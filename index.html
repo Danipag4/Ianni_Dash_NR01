@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pesquisa de Saúde Psicossocial · NR-01 · 2026</title>
+<meta name="description" content="Dashboard interativo de diagnóstico psicossocial conforme NR-01.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --p:#1B3A6B;--pd:#122B52;--pl:#2563EB;
+  --bg:#F1F5F9;--card:#fff;--text:#0F172A;--muted:#475569;--border:#E2E8F0;
+  --rH:#EF4444;--rM:#F97316;--rA:#EAB308;--rG:#22C55E;--rT:#14B8A6;
+  --sh:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.04);
+  --shm:0 4px 6px -1px rgba(0,0,0,.08),0 2px 4px -1px rgba(0,0,0,.04);
+  --shl:0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -2px rgba(0,0,0,.05);
+  --r:12px;--tr:0.2s ease
+}
+body{font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+/* HEADER */
+.site-header{background:linear-gradient(135deg,#1B3A6B 0%,#0D2447 100%);padding:18px 32px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 12px rgba(0,0,0,.3)}
+.hdr-left h1{font-size:1.4rem;font-weight:800;color:#fff;letter-spacing:-.5px}
+.hdr-left p{font-size:.78rem;color:#93C5FD;margin-top:3px}
+.hdr-badge{background:rgba(255,255,255,.15);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:6px 14px;color:#E0F2FE;font-size:.78rem;font-weight:600}
+
+/* FILTERS */
+.filters-wrap{background:#fff;border-bottom:1px solid var(--border);padding:12px 32px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;position:sticky;top:0;z-index:100;box-shadow:var(--sh)}
+.fg{display:flex;align-items:center;gap:6px}
+.fg label{font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+.fsel{border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;font-size:.82rem;font-family:inherit;color:var(--text);background:#fff;cursor:pointer;transition:border-color var(--tr);min-width:150px}
+.fsel:focus{outline:none;border-color:var(--pl)}
+.btn-clear{background:var(--p);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:.8rem;font-weight:600;font-family:inherit;cursor:pointer;transition:background var(--tr);white-space:nowrap}
+.btn-clear:hover{background:var(--pd)}
+.f-count{margin-left:auto;background:var(--p);color:#fff;border-radius:20px;padding:4px 14px;font-size:.78rem;font-weight:700;white-space:nowrap}
+
+/* MAIN */
+.main{max-width:1400px;margin:0 auto;padding:24px 32px}
+
+/* KPIs */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px}
+.kpi-card{background:var(--card);border-radius:var(--r);padding:20px 24px;box-shadow:var(--shm);border-left:4px solid var(--pl);transition:transform var(--tr),box-shadow var(--tr)}
+.kpi-card:hover{transform:translateY(-2px);box-shadow:var(--shl)}
+.kpi-card.c-green{border-color:var(--rG)}.kpi-card.c-teal{border-color:var(--rT)}.kpi-card.c-orange{border-color:var(--rM)}.kpi-card.c-red{border-color:var(--rH)}
+.kpi-lbl{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:6px}
+.kpi-val{font-size:2rem;font-weight:800;line-height:1}
+.kpi-sub{font-size:.75rem;color:var(--muted);margin-top:4px}
+
+/* TABS */
+.tabs-wrap{background:var(--card);border-radius:var(--r);box-shadow:var(--shm);overflow:hidden}
+.tabs-nav{display:flex;border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none}
+.tabs-nav::-webkit-scrollbar{display:none}
+.tab-btn{padding:14px 20px;font-size:.83rem;font-weight:600;font-family:inherit;background:none;border:none;border-bottom:3px solid transparent;cursor:pointer;color:var(--muted);white-space:nowrap;transition:all var(--tr)}
+.tab-btn:hover{color:var(--p);background:var(--bg)}
+.tab-btn.active{color:var(--p);border-bottom-color:var(--p)}
+.tab-panel{display:none;padding:28px}
+.tab-panel.active{display:block}
+
+/* CHARTS */
+.chart-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px}
+.chart-card{background:var(--bg);border-radius:var(--r);padding:20px}
+.chart-card h3{font-size:.8rem;font-weight:700;color:var(--p);margin-bottom:14px;text-transform:uppercase;letter-spacing:.5px}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:.7rem;font-weight:700;color:#fff}
+.bH{background:var(--rH)}.bM{background:var(--rM)}.bA{background:var(--rA);color:#1a1a1a}.bG{background:var(--rG)}.bT{background:var(--rT)}
+
+/* SCORE BAR */
+.sbar{height:8px;border-radius:4px;background:var(--border);overflow:hidden;margin-top:8px}
+.sbar-f{height:100%;border-radius:4px;transition:width .5s ease}
+
+/* SECTION TITLE */
+.sec-title{font-size:1rem;font-weight:800;color:var(--p);margin-bottom:16px;padding-bottom:8px;border-bottom:2px solid var(--border)}
+
+/* THEME CARDS */
+.theme-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:20px}
+.tc{background:var(--card);border-radius:var(--r);padding:16px;box-shadow:var(--sh);border-top:4px solid transparent}
+.tc-name{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:4px}
+.tc-score{font-size:2rem;font-weight:800}
+.tc-lbl{font-size:.73rem;color:var(--muted);margin-top:2px}
+
+/* Q ROWS */
+.q-rows{display:flex;flex-direction:column;gap:8px}
+.q-row{display:grid;grid-template-columns:52px 1fr 80px 120px;gap:12px;align-items:center;background:var(--card);padding:12px 16px;border-radius:8px;box-shadow:var(--sh);transition:transform var(--tr)}
+.q-row:hover{transform:translateX(4px);box-shadow:var(--shm)}
+.q-num{font-size:.78rem;font-weight:800;color:var(--p)}
+.q-text{font-size:.8rem;line-height:1.3}
+.q-score{font-size:1.3rem;font-weight:800;text-align:center}
+.mini-dist{display:flex;height:5px;border-radius:3px;overflow:hidden;gap:1px;margin-top:5px}
+
+/* HEATMAP */
+.hmap{width:100%;border-collapse:collapse;font-size:.8rem}
+.hmap th{background:var(--p);color:#fff;padding:9px 14px;text-align:center;font-size:.72rem;font-weight:600;white-space:nowrap}
+.hmap th:first-child{text-align:left}
+.hmap td{padding:9px 14px;text-align:center;font-weight:700;border:1px solid rgba(255,255,255,.3)}
+.hmap td:first-child{text-align:left;font-weight:600;background:var(--bg);color:var(--text);border:1px solid var(--border)}
+
+/* DATA TABLE */
+.dtbl{width:100%;border-collapse:collapse;font-size:.78rem}
+.dtbl th{background:var(--p);color:#fff;padding:9px 12px;text-align:left;font-size:.7rem;font-weight:600;white-space:nowrap}
+.dtbl td{padding:7px 12px;border-bottom:1px solid var(--border);white-space:nowrap}
+.dtbl tr:hover td{background:#F8FAFF}
+.dtbl .sc{font-weight:700;text-align:center}
+
+/* INSIGHT */
+.insight{background:linear-gradient(135deg,#EFF6FF,#DBEAFE);border:1px solid #BFDBFE;border-radius:var(--r);padding:16px 20px;margin-top:16px}
+.insight h4{font-size:.83rem;font-weight:700;color:#1E40AF;margin-bottom:8px}
+.insight ul{font-size:.8rem;color:#1E3A8A;list-style:none;display:flex;flex-direction:column;gap:5px}
+.insight li::before{content:"→ ";font-weight:700}
+
+/* FOOTER */
+.site-footer{text-align:center;padding:20px;font-size:.72rem;color:var(--muted);border-top:1px solid var(--border);margin-top:32px}
+
+@media(max-width:768px){
+  .site-header{padding:14px;flex-direction:column;gap:10px}
+  .filters-wrap{padding:10px 14px}
+  .main{padding:14px}
+  .chart-grid-2{grid-template-columns:1fr}
+  .q-row{grid-template-columns:44px 1fr 70px}
+  .q-row .badge{display:none}
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="hdr-left">
+    <h1>🏥 Pesquisa de Saúde Psicossocial</h1>
+    <p>Diagnóstico de Fatores Psicossociais do Trabalho · NR-01 · Outubro 2026</p>
+  </div>
+  <div class="hdr-badge">NR-01 · 2026</div>
+</header>
+
+<div class="filters-wrap">
+  <div class="fg"><label>Setor</label>
+    <select id="f-setor" class="fsel" onchange="applyFilters()">
+      <option value="">Todos os Setores</option><option value="Administração">Administração</option>
+<option value="Bovinocultura">Bovinocultura</option>
+<option value="Frota">Frota</option>
+<option value="Jardinagem/ETA/ETE">Jardinagem/ETA/ETE</option>
+<option value="Limpeza/Lavanderia">Limpeza/Lavanderia</option>
+<option value="Manutenção">Manutenção</option>
+<option value="Produção">Produção</option>
+    </select>
+  </div>
+  <div class="fg"><label>Unidade</label>
+    <select id="f-unidade" class="fsel" onchange="applyFilters()">
+      <option value="">Todas as Unidades</option><option value="CSA (Administrativo e Fábrica de Ração)">CSA (Administrativo e Fábrica de Ração)</option>
+<option value="FAM">FAM</option>
+<option value="SC">SC</option>
+<option value="SNSF">SNSF</option>
+<option value="SSB">SSB</option>
+<option value="SSJ">SSJ</option>
+    </select>
+  </div>
+  <div class="fg"><label>Função</label>
+    <select id="f-funcao" class="fsel" onchange="applyFilters()">
+      <option value="">Todas as Funções</option><option value="Administrativo">Administrativo</option>
+<option value="Liderança">Liderança</option>
+<option value="Operacional">Operacional</option>
+    </select>
+  </div>
+  <div class="fg"><label>Tempo</label>
+    <select id="f-tempo" class="fsel" onchange="applyFilters()">
+      <option value="">Todos</option><option value="Menos de 6 meses">Menos de 6 meses</option>
+<option value="6 meses a 1 ano">6 meses a 1 ano</option>
+<option value="1 a 2 anos">1 a 2 anos</option>
+<option value="2 a 5 anos">2 a 5 anos</option>
+<option value="5 a 10 anos">5 a 10 anos</option>
+<option value="Acima de 10 anos">Acima de 10 anos</option>
+    </select>
+  </div>
+  <button class="btn-clear" onclick="clearFilters()">↺ Limpar</button>
+  <span id="f-count" class="f-count">55 respondentes</span>
+</div>
+
+<div class="main">
+
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-lbl">Respondentes</div>
+      <div class="kpi-val" id="kpi-n">55</div>
+      <div class="kpi-sub">no filtro selecionado</div>
+    </div>
+    <div class="kpi-card" id="kpi-card-ov">
+      <div class="kpi-lbl">Índice Geral</div>
+      <div class="kpi-val" id="kpi-ov">–</div>
+      <div class="kpi-sub">Pontuação média 1–5 · <span id="kpi-ov-lbl"></span></div>
+    </div>
+    <div class="kpi-card c-teal">
+      <div class="kpi-lbl">Tema Mais Forte</div>
+      <div class="kpi-val" id="kpi-best-v" style="font-size:1.4rem">–</div>
+      <div class="kpi-sub" id="kpi-best-n">–</div>
+    </div>
+    <div class="kpi-card c-orange">
+      <div class="kpi-lbl">Tema Mais Crítico</div>
+      <div class="kpi-val" id="kpi-worst-v" style="font-size:1.4rem">–</div>
+      <div class="kpi-sub" id="kpi-worst-n">–</div>
+    </div>
+  </div>
+
+  <div class="tabs-wrap">
+    <div class="tabs-nav">
+      <button class="tab-btn active" onclick="showTab('visao-geral',this)">📊 Visão Geral</button>
+      <button class="tab-btn" onclick="showTab('por-questao',this)">📋 Por Questão</button>
+      <button class="tab-btn" onclick="showTab('por-tema',this)">🏷️ Por Tema</button>
+      <button class="tab-btn" onclick="showTab('por-setor',this)">🏭 Por Setor</button>
+      <button class="tab-btn" onclick="showTab('por-unidade',this)">🏢 Por Unidade</button>
+      <button class="tab-btn" onclick="showTab('dados',this)">📑 Dados</button>
+    </div>
+
+    <!-- TAB 1 -->
+    <div id="tab-visao-geral" class="tab-panel active">
+      <div class="sec-title">Panorama Geral por Tema</div>
+      <div class="theme-grid" id="theme-cards"></div>
+      <div class="chart-grid-2">
+        <div class="chart-card">
+          <h3>📡 Radar por Tema</h3>
+          <div style="position:relative;height:300px"><canvas id="ch-radar"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <h3>🥧 Distribuição Global das Respostas</h3>
+          <div style="position:relative;height:300px"><canvas id="ch-donut"></canvas></div>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h3>📊 Pontuação Média por Questão</h3>
+        <div style="position:relative;height:400px"><canvas id="ch-bar-ov"></canvas></div>
+      </div>
+      <div class="insight" id="insight-box">
+        <h4>💡 Principais Insights</h4>
+        <ul id="insight-list"></ul>
+      </div>
+    </div>
+
+    <!-- TAB 2 -->
+    <div id="tab-por-questao" class="tab-panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <div class="sec-title" style="margin:0;border:0;padding:0">Detalhamento por Questão</div>
+        <select id="q-sort" class="fsel" style="min-width:200px" onchange="renderQtab()">
+          <option value="num">Ordenar: Nº da Questão</option>
+          <option value="asc">Ordenar: Pontuação ↑ (crítico primeiro)</option>
+          <option value="desc">Ordenar: Pontuação ↓ (melhor primeiro)</option>
+        </select>
+      </div>
+      <div id="q-rows"></div>
+    </div>
+
+    <!-- TAB 3 -->
+    <div id="tab-por-tema" class="tab-panel">
+      <div class="sec-title">Análise por Tema</div>
+      <div class="chart-grid-2">
+        <div class="chart-card">
+          <h3>📊 Comparativo de Temas</h3>
+          <div style="position:relative;height:300px"><canvas id="ch-tema-bar"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <h3>📡 Radar por Tema</h3>
+          <div style="position:relative;height:300px"><canvas id="ch-tema-radar"></canvas></div>
+        </div>
+      </div>
+      <div style="overflow-x:auto"><table class="dtbl" id="tbl-tema"></table></div>
+    </div>
+
+    <!-- TAB 4 -->
+    <div id="tab-por-setor" class="tab-panel">
+      <div class="sec-title">Análise por Setor</div>
+      <div class="chart-card" style="margin-bottom:20px">
+        <h3>📊 Temas × Setor</h3>
+        <div style="position:relative;height:360px"><canvas id="ch-setor-bar"></canvas></div>
+      </div>
+      <div class="sec-title">Mapa de Calor · Setor × Tema</div>
+      <div style="overflow-x:auto"><table class="hmap" id="tbl-setor"></table></div>
+    </div>
+
+    <!-- TAB 5 -->
+    <div id="tab-por-unidade" class="tab-panel">
+      <div class="sec-title">Análise por Unidade</div>
+      <div class="chart-card" style="margin-bottom:20px">
+        <h3>📊 Temas × Unidade</h3>
+        <div style="position:relative;height:360px"><canvas id="ch-unidade-bar"></canvas></div>
+      </div>
+      <div class="sec-title">Mapa de Calor · Unidade × Tema</div>
+      <div style="overflow-x:auto"><table class="hmap" id="tbl-unidade"></table></div>
+    </div>
+
+    <!-- TAB 6 -->
+    <div id="tab-dados" class="tab-panel">
+      <div class="sec-title">Respostas Individuais</div>
+      <div style="overflow-x:auto">
+        <table class="dtbl">
+          <thead><tr><th>#</th><th>Setor</th><th>Unidade</th><th>Função</th><th>Tempo</th><th>Q1</th>
+<th>Q2</th>
+<th>Q3</th>
+<th>Q4</th>
+<th>Q5</th>
+<th>Q6</th>
+<th>Q7</th>
+<th>Q8</th>
+<th>Q9</th>
+<th>Q10</th>
+<th>Q11</th>
+<th>Q12</th>
+<th>Q13</th>
+<th>Q14</th>
+<th>Q15</th>
+<th>Q16</th>
+<th>Q17</th>
+<th>Q18</th>
+<th>Q19</th>
+<th>Q20</th><th>Média</th></tr></thead>
+          <tbody id="tbl-dados"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /tabs-wrap -->
+</div><!-- /main -->
+
+<footer class="site-footer">
+  Diagnóstico Psicossocial · NR-01 · Confidencial · Uso exclusivo da Diretoria · Outubro 2026
+</footer>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────
+const RAW_DATA = [{"setor": "Administração", "funcao": "Administrativo", "tempo": "6 meses a 1 ano", "unidade": "CSA (Administrativo e Fábrica de Ração)", "Q1": 3, "Q2": 4, "Q3": 4, "Q4": 2, "Q5": 3, "Q6": 3, "Q7": 5, "Q8": 4, "Q9": 5, "Q10": 2, "Q11": 2, "Q12": 2, "Q13": 3, "Q14": 2, "Q15": 3, "Q16": 5, "Q17": 4, "Q18": 3, "Q19": 5, "Q20": 5}, {"setor": "Manutenção", "funcao": "Operacional", "tempo": "6 meses a 1 ano", "unidade": "SSB", "Q1": 3, "Q2": 4, "Q3": 5, "Q4": 4, "Q5": 5, "Q6": 4, "Q7": 5, "Q8": 5, "Q9": 4, "Q10": 5, "Q11": 5, "Q12": 5, "Q13": 4, "Q14": 4, "Q15": 5, "Q16": 5, "Q17": 5, "Q18": 5, "Q19": 4, "Q20": 5}, {"setor": "Manutenção", "funcao": "Operacional", "tempo": "Menos de 6 meses", "unidade": "SSB", "Q1": 3, "Q2": 3, "Q3": 4, "Q4": 4, "Q5": 4, "Q6": 4, "Q7": 5, "Q8": 4, "Q9": 4, "Q10": 5, "Q11": 5, "Q12": 5, "Q13": 3, "Q14": 2, "Q15": 5, "Q16": 3, "Q17": 3, "Q18": 5, "Q19": 5, "Q20": 2}, {"setor": "Manutenção", "funcao": "Operacional", "tempo": "Menos de 6 meses", "unidade": "SSB", "Q1": 4, "Q2": 3, "Q3": 4, "Q4": 3, "Q5": 5, "Q6": 5, "Q7": 5, "Q8": 5, "Q9": 4, "Q10": 4, "Q11": 5, "Q12": 3, "Q13": 4, "Q14": 5, "Q15": 5, "Q16": 2, "Q17": 5, "Q18": 4, "Q19": 5, "Q20": 4}, {"setor": "Administração", "funcao": "Administrativo", "tempo": "1 a 2 anos", "unidade": "SSB", "Q1": 4, "Q2": 4, "Q3": 5, "Q4": 4, "Q5": 5, "Q6": 4, "Q7": 5, "Q8": 5, "Q9": 5, "Q10": 5, "Q11": 5, "Q12": 5, "Q13": 5, "Q14": 5, "Q15": 5, "Q16": 5, "Q17": 5, "Q18": 5, "Q19": 5, "Q20": 5}, {"setor": "Produção", "funcao": "Operacional", "tempo": "Menos de 6 meses", "unidade": "SSB", "Q1": 3, "Q2": 3, "Q3": 5, "Q4": 3, "Q5": 5, "Q6": 3, "Q7": 3, "Q8": 2, "Q9": 3, "Q10": 2, "Q11": 5, "Q12": 3, "Q13": 3, "Q14": 5, "Q15": 5, "Q16": 3, "Q17": 5, "Q18": 5, "Q19": 2, "Q20": 2}, {"setor": "Limpeza/Lavanderia", "funcao": "Operacional", "tempo": "Menos de 6 meses", "unidade": "SSB", "Q1": 3, "Q2": 3, "Q3": 5, "Q4": 3, "Q5": 5, "Q6": 3, "Q7": 5, "Q8": 5, "Q9": 5, "Q10": 2, "Q11": 5, "Q12": 5, "Q13": 5, "Q14": 5, "Q15": 5, "Q16": 5, "Q17": 5, "Q18": 5, "Q19": 3, "Q20": 5}, {"setor": "Manutenção", "funcao": "Operacional", "tempo": "2 a 5 anos", "unidade": "SSB", "Q1": 5, "Q2": 5, "Q3": 3, "Q4": 3, "Q5": 5, "Q6": 5, "Q7": 3, "Q8": 3, "Q9": 4, "Q10": 3, "Q11": 3, "Q12": 3, "Q13": 3, "Q14": 3, "Q15": 3, "Q16": 3, "Q17": 3, "Q18": 3, "Q19": 3, "Q20": 5}, {"setor": "Produção", "funcao": "Liderança", "tempo": "6 meses a 1 ano", "unidade": "SSB", "Q1": 3, "Q2": 5, "Q3": 3, "Q4": 4, "Q5": 5, "Q6": 5, "Q7": 5, "Q8": 5, "Q9": 5, "Q10": 4, "Q11": 5, "Q12": 5, "Q13": 5, "Q14": 4, "Q15": 5, "Q16": 4, "Q17": 5, "Q18": 5, "Q19": 3, "Q20": 5}, {"setor": "Produção", "funcao": "Liderança", "tempo": "Acima de 10 anos", "unidade": "SSJ", "Q1": 4, "Q2": 4, "Q3": 5, "Q4": 4, "Q5": 5, "Q6": 5, "Q7": 5, "Q8": 5, "Q9": 5, "Q10": 4, "Q11": 5, "Q12": 5, "Q13": 3, "Q14": 4, "Q15": 5, "Q16": 5, "Q17": 5, "Q18": 4, "Q19": 4, "Q20": 5}, {"setor": "Limpeza/Lavanderia", "funcao": "Administrativo", "tempo": "Menos de 6 meses", "unidade": "SNSF", "Q1": 3, "Q2": 3, "Q3": 5, "Q4": 3, "Q5": 5, "Q6": 3, "Q7": 3, "Q8": 3, "Q9": 1, "Q10": 3, "Q11": 5, "Q12": 5, "Q13": 1, "Q14": 3, "Q15": 3, "Q16": 1, "Q17": 1, "Q18": 1, "Q19": 3, "Q20": 1}, {"setor": "Produção", "funcao": "Operacional", "tempo": "Menos de 6 meses", "unidade": "SSJ", "Q1": 3, "Q2": 3, "Q3": 3, "Q4": 3, "Q5": 5, "Q6": 5, "Q7": 5, "Q8": 3, "Q9": 5, "Q10": 4, "Q11": 3, "Q12": 4, "Q13": 2, "Q14": 2, "Q15": 5, "Q16": 3, "Q17": 5, "Q18": 3, "Q19": 3, "Q20": 3}, {"setor": "Administração", "funcao": "Liderança", "tempo": "Menos de 6 meses", "unidade": "CSA (Administrativo e Fábrica de Ração)", "Q1": 3, "Q2": 3, "Q3": 2, "Q4": 2, "Q5": 4, "Q6": 3, "Q7": 4, "Q8": 4, "Q9": 2, "Q10": 3, "Q11": 2, "Q12": 3, "Q13": 4, "Q14": 2, "Q15": 4, "Q16": 5, "Q17": 4, "Q18": 4, "Q19": 4, "Q20": 5}, {"setor": "Produção", "funcao": "Administrativo", "tempo": "1 a 2 anos", "unidade": "SSJ", "Q1": 2, "Q2": 2, "Q3": 1, "Q4": 4, "Q5": 5, "Q6": 5, "Q7": 5, "Q8": 5, "Q9": 4, "Q10": 4, "Q11": 5, "Q12": 5, "Q13": 3, "Q14": 1, "Q15": 5, "Q16": 5, "Q17": 5, "Q18": 3, "Q19": 5, "Q20": 5}, {"setor": "Manutenção", "funcao": "Operacional", "tempo": "1 a 2 anos", "unidade": "SSJ", "Q1": 2, "Q2": 2, "Q3": 3, "Q4": 2, "Q5": 5, "Q6": 3, "Q7": 5, "Q8": 5, "Q9": 5, "Q10": 5, "Q11": 5, "Q12": 5, "Q13": 3, "Q14": 2, "Q15": 5, "Q16": 4, "Q17": 5, "Q18": 5, "Q19": 5, "Q20": 3}, {"setor": "Produção", "funcao": "Liderança", "tempo": "1 a 2 anos", "unidade": "CSA (Administrativo e Fábrica de Ração)", "Q1": 4, "Q2": 4, "Q3": 2, "Q4": 2, "Q5": 5, "Q6": 3, "Q7": 5, "Q8": 4, "Q9": 2, "Q10": 4, "Q11": 5, "Q12": 4, "Q13": 5, "Q14": 5, "Q15": 4, "Q16": 5, "Q17": 4, "Q18": 4, "Q19": 2, "Q20": 4}, {"setor": "Administração", "funcao": "Administrativo", "tempo": "1 a 2 anos", "unidade": "CSA (Administrativo e Fábrica de Ração)", "Q1": 4, "Q2": 4, "Q3": 4, "Q4": 2, "Q5": 5, "Q6": 4, "Q7": 4, "Q8": 2, "Q9": 5, "Q10": 5, "Q11": 5, "Q12": 5, "Q13": 3, "Q14": 5, "Q15": 5, "Q16": 3, "Q17": 4, "Q18": 5, "Q19": 5, "Q20": 4}, {"setor": "Produção", "funcao": "Operacional", "tempo": "1 a 2 anos", "unidade": "SSJ", "Q1": 1, "Q2": 3, "Q3": 3, "Q4": 3, "Q5": 5, "Q6": 5, "Q7": 5, "Q8": 5, "Q9": 5, "Q10": 5, "Q11": 5, "Q12": 5, "Q13": 5, "Q14": 5, "Q15": 5, "Q16": 3, "Q17": 3, "Q18": 5, "Q19": 5, "Q20": 5}, {"setor": "Produção", "funcao": "Operacional", "tempo": "6 meses a 1 ano", "unidade": "SC", "Q1": 3, "Q2": 5, "Q3": 5, "Q4": 3, "Q5": 5, "Q6": 2, "Q7": 5, "Q8": 5, "Q9": 2, "Q10": 5, "Q11": 5, "Q12": 5, "Q13": 5, "Q14": 1, "Q15": 5, "Q16": 5, "Q17": 5, "Q18": 5, "Q19": 5, "Q20": 3}, {"setor": "Produção", "funcao": "Operacional", "tempo": "1 a 2 anos", "unidade": "SSJ", "Q1": 3, "Q2": 3, "Q3": 3, "Q4": 3, "Q5": 3, "Q6": 3, "Q7": 3, "Q8": 3, "Q9": 3, "Q10": 3, "Q11": 3, "Q12": 3, "Q13": 3, "Q14": 3, "Q15": 4, "Q16": 3, "Q17": 4, "Q18": 3, "Q19": 3, "Q20": 2}, {"setor": "Produção", "funcao": "Liderança", "tempo": "6 meses a 1 ano", "unidade": "SC", "Q1": 4, "Q2": 4, "Q3": 3, "Q4": 3, "Q5": 5, "Q6": 4, "Q7": 5, "Q8": 4, "Q9": 5, "Q10": 2, "Q11": 2, "Q12": 3, "Q13": 4, "Q14": 3, "Q15": 4, "Q16": 2, "Q17": 3, "Q18": 4, "Q19": 4, "Q20": 4}, {"setor": "Manutenção", "funcao": "Operacional", "tempo": "Menos de 6 meses", "unidade": "SSB", "Q1": 3, "Q2": 5, "Q3": 5, "Q4": 5, "Q5": 5, "Q6": 1, "Q7": 5, "Q8": 5, "Q9": 3, "Q10": 5, "Q11": 5, "Q12": 5, "Q13": 5, "Q14": 5, "Q15": 3, "Q16": 5, "Q17": 5, "Q18": 5, "Q19": 5, "Q20": 5}, {"setor": "Produção", "funcao": "Operacional", "tempo": "2 a 5 anos", "unidade": "SSJ", "Q1": 3, "Q2": 3, "Q3": 3, "Q4": 3, "Q5": 5, "Q6": 3, "Q7": 3, "Q8": 3, "Q9": 3, "Q10": 3, "Q11": 3, "Q12": 5, "Q13": 1, "Q14": 2, "Q15": 3, "Q16": 4, "Q17": 3, "Q18": 4, "Q19": 3, "Q20": 5}, {"setor": "Manutenção", "funcao": "Operacional", "tempo": "1 a 2 anos", "unidade": "SSB", "Q1": 2, "Q2": 1, "Q3": 1, "Q4": 5, "Q5": 4, "Q6": 3, "Q7": 5, "Q8": 3, "Q9": 1, "Q10": 3, "Q11": 5, "Q12": 1, "Q13": 2, "Q14": 5, "Q15": 1, "Q16": 1, "Q17": 3, "Q18": 3, "Q19": 1, "Q20": 3}, {"setor": "Administração", "funcao": "Administrativo", "tempo": "2 a 5 anos", "unidade": "CSA (Administrativo e Fábrica de Ração)", "Q1": 4, "Q2": 5, "Q3": 5, "Q4": 5, "Q5": 5, "Q6": 3, "Q7": 3, "Q8": 2, "Q9": 5, "Q10": 4, "Q11": 4, "Q12": 4, "Q13": 3, "Q14": 3, "Q15": 4, "Q16": 3, "Q17": 3, "Q18": 4, "Q19": 5, "Q20": 5}, {"setor": "Administração", "funcao": "Administrativo", "tempo": "Menos de 6 meses", "unidade": "CSA (Administrativo e Fábrica de Ração)", "Q1": 5, "Q2": 5, "Q3": 5, "Q4": 5, "Q5": 5, "Q6": 4, "Q7": 5, "Q8": 5, "Q9": 5, "Q10": 5, "Q11": 5, "Q12": 5, "Q13": 5, "Q14": 5, "Q15": 5, "Q16": 5, "Q17": 5, "Q18": 5, "Q19": 5, "Q20": 5}, {"setor": "Produção", "funcao": "Liderança", "tempo": "2 a 5 anos", "unidade": "SSJ", "Q1": 2, "Q2": 2, "Q3": 3, "Q4": 3, "Q5": 5, "Q6": 3, "Q7": 5, "Q8": 4, "Q9": 3, "Q10": 4, "Q11": 4, "Q12": 2, "Q13": 3, "Q14": 4, "Q15": 3, "Q16": 4, "Q17": 3, "Q18": 3, "Q19": 2, "Q20": 4}, {"setor": "Administração", "funcao": "Administrativo", "tempo": "6 meses a 1 ano", "unidade": "SC", "Q1": 4, "Q2": 4, "Q3": 4, "Q4": 3, "Q5": 5, "Q6": 4, "Q7": 4, "Q8": 4, "Q9": 4, "Q10": 4, "Q11": 2, "Q12": 2, "Q13": 4, "Q14": 4, "Q15": 4, "Q16": 4, "Q17": 4, "Q18": 3, "Q19": 5, "Q20": 4}, {"setor": "Administração", "funcao": "Administrativo", "tempo": "Menos de 6 meses", "unidade": "CSA (Administrativo e Fábrica de Ração)", "Q1": 4, "Q2": 4, "Q3": 5, "Q4": 4, "Q5": 2, "Q6": 2, "Q7": 5, "Q8": 3, "Q9": 4, "Q10": 3, "Q11": 5, "Q12": 5, "Q13": 4, "Q14": 4, "Q15": 3, "Q16": 3, "Q17": 3, "Q18": 5, "Q19": 5, "Q20": 5}, {"setor": "Produção", "funcao": "Operacional", "tempo": "1 a 2 anos", "unidade": "SSJ", "Q1": 2, "Q2": 4, "Q3": 1, "Q4": 2, "Q5": 4, "Q6": 1, "Q7": 1, "Q8": 1, "Q9": 2, "Q10": 2, "Q11": 3, "Q12": 1, "Q13": 2, "Q14": 2, "Q15": 2, "Q16": 2, "Q17": 2, "Q18": 2, "Q19": 2, "Q20": 3}, {"setor": "Produção", "funcao": "Liderança", "tempo": "Acima de 10 anos", "unidade": "SSJ", "Q1": 4, "Q2": 4, "Q3": 5, "Q4": 4, "Q5": 5, "Q6": 4, "Q7": 5, "Q8": 5, "Q9": 5, "Q10": 4, "Q11": 4, "Q12": 5, "Q13": 3, "Q14": 5, "Q15": 5, "Q16": 4, "Q17": 5, "Q18": 4, "Q19": 4, "Q20": 5}, {"setor": "Produção", "funcao": "Operacional", "tempo": "6 meses a 1 ano", "unidade": "SSJ", "Q1": 3, "Q2": 3, "Q3": 3, "Q4": 3, "Q5": 5, "Q6": 5, "Q7": 4, "Q8": 3, "Q9": 5, "Q10": 3, "Q11": 3, "Q12": 3, "Q13": 2, "Q14": 3, "Q15": 4, "Q16": 3, "Q17": 5, "Q18": 4, "Q19": 4, "Q20": 3}, {"setor": "Produção", "funcao": "Operacional", "tempo": "Menos de 6 meses", "unidade": "SSJ", "Q1": 3, "Q2": 3, "Q3": 5, "Q4": 2, "Q5": 5, "Q6": 5, "Q7": 4, "Q8": 5, "Q9": 3, "Q10": 1, "Q11": 3, "Q12": 1, "Q13": 2, "Q14": 3, "Q15": 5, "Q16": 1, "Q17": 3, "Q18": 2, "Q19": 2, "Q20": 3}, {"setor": "Frota", "funcao": "Operacional", "tempo": "6 meses a 1 ano", "unidade": "SSB", "Q1": 5, "Q2": 5, "Q3": 5, "Q4": 1, "Q5": 5, "Q6": 1, "Q7": 5, "Q8": 5, "Q9": 1, "Q10": 5, "Q11": 5, "Q12": 1, "Q13": 5, "Q14": 5, "Q15": 5, "Q16": 5, "Q17": 5, "Q18": 5, "Q19": 5, "Q20": 5}, {"setor": "Jardinagem/ETA/ETE", "funcao": "Operacional", "tempo": "1 a 2 anos", "unidade": "SSB", "Q1": 4, "Q2": 5, "Q3": 5, "Q4": 2, "Q5": 5, "Q6": 4, "Q7": 3, "Q8": 2, "Q9": 1, "Q10": 5, "Q11": 5, "Q12": 1, "Q13": 5, "Q14": 5, "Q15": 3, "Q16": 4, "Q17": 4, "Q18": 4, "Q19": 5, "Q20": 5}, {"setor": "Manutenção", "funcao": "Operacional", "tempo": "1 a 2 anos", "unidade": "SSJ", "Q1": 3, "Q2": 5, "Q3": 3, "Q4": 3, "Q5": 5, "Q6": 3, "Q7": 4, "Q8": 4, "Q9": 3, "Q10": 4, "Q11": 5, "Q12": 5, "Q13": 3, "Q14": 2, "Q15": 4, "Q16": 3, "Q17": 3, "Q18": 4, "Q19": 3, "Q20": 3}, {"setor": "Jardinagem/ETA/ETE", "funcao": "Operacional", "tempo": "1 a 2 anos", "unidade": "SSB", "Q1": 3, "Q2": 3, "Q3": 5, "Q4": 3, "Q5": 5, "Q6": 3, "Q7": 5, "Q8": 5, "Q9": 4, "Q10": 3, "Q11": 5, "Q12": 3, "Q13": 3, "Q14": 2, "Q15": 1, "Q16": 1, "Q17": 3, "Q18": 3, "Q19": 1, "Q20": 3}, {"setor": "Frota", "funcao": "Operacional", "tempo": "2 a 5 anos", "unidade": "SSB", "Q1": 5, "Q2": 5, "Q3": 3, "Q4": 3, "Q5": 5, "Q6": 5, "Q7": 5, "Q8": 5, "Q9": 1, "Q10": 5, "Q11": 5, "Q12": 5, "Q13": 3, "Q14": 3, "Q15": 5, "Q16": 3, "Q17": 5, "Q18": 5, "Q19": 5, "Q20": 5}, {"setor": "Produção", "funcao": "Administrativo", "tempo": "Menos de 6 meses", "unidade": "SC", "Q1": 5, "Q2": 5, "Q3": 5, "Q4": 5, "Q5": 3, "Q6": 3, "Q7": 5, "Q8": 1, "Q9": 5, "Q10": 1, "Q11": 1, "Q12": 5, "Q13": 1, "Q14": 1, "Q15": 5, "Q16": 1, "Q17": 1, "Q18": 1, "Q19": 3, "Q20": 1}, {"setor": "Produção", "funcao": "Operacional", "tempo": "Acima de 10 anos", "unidade": "CSA (Administrativo e Fábrica de Ração)", "Q1": 3, "Q2": 3, "Q3": 2, "Q4": 3, "Q5": 5, "Q6": 5, "Q7": 5, "Q8": 5, "Q9": 5, "Q10": 3, "Q11": 4, "Q12": 5, "Q13": 3, "Q14": 3, "Q15": 5, "Q16": 5, "Q17": 5, "Q18": 5, "Q19": 4, "Q20": 3}, {"setor": "Administração", "funcao": "Liderança", "tempo": "5 a 10 anos", "unidade": "SSB", "Q1": 4, "Q2": 4, "Q3": 4, "Q4": 4, "Q5": 5, "Q6": 4, "Q7": 5, "Q8": 4, "Q9": 4, "Q10": 4, "Q11": 5, "Q12": 1, "Q13": 5, "Q14": 1, "Q15": 5, "Q16": 5, "Q17": 5, "Q18": 5, "Q19": 5, "Q20": 3}, {"setor": "Produção", "funcao": "Operacional", "tempo": "6 meses a 1 ano", "unidade": "SC", "Q1": 5, "Q2": 5, "Q3": 5, "Q4": 2, "Q5": 5, "Q6": 3, "Q7": 5, "Q8": 5, "Q9": 5, "Q10": 5, "Q11": 5, "Q12": 5, "Q13": 5, "Q14": 2, "Q15": 5, "Q16": 5, "Q17": 5, "Q18": 2, "Q19": 5, "Q20": 5}, {"setor": "Produção", "funcao": "Liderança", "tempo": "Acima de 10 anos", "unidade": "SSJ", "Q1": 5, "Q2": 5, "Q3": 5, "Q4": 5, "Q5": 5, "Q6": 4, "Q7": 5, "Q8": 5, "Q9": 5, "Q10": 5, "Q11": 5, "Q12": 5, "Q13": 4, "Q14": 4, "Q15": 3, "Q16": 5, "Q17": 5, "Q18": 5, "Q19": 4, "Q20": 5}, {"setor": "Produção", "funcao": "Administrativo", "tempo": "Menos de 6 meses", "unidade": "SSB", "Q1": 5, "Q2": 5, "Q3": 3, "Q4": 5, "Q5": 5, "Q6": 5, "Q7": 5, "Q8": 5, "Q9": 1, "Q10": 5, "Q11": 5, "Q12": 1, "Q13": 5, "Q14": 5, "Q15": 5, "Q16": 5, "Q17": 5, "Q18": 5, "Q19": 5, "Q20": 5}, {"setor": "Produção", "funcao": "Operacional", "tempo": "6 meses a 1 ano", "unidade": "SSJ", "Q1": 5, "Q2": 5, "Q3": 5, "Q4": 5, "Q5": 5, "Q6": 5, "Q7": 5, "Q8": 5, "Q9": 5, "Q10": 5, "Q11": 5, "Q12": 5, "Q13": 1, "Q14": 3, "Q15": 5, "Q16": 5, "Q17": 4, "Q18": 5, "Q19": 3, "Q20": 3}, {"setor": "Produção", "funcao": "Operacional", "tempo": "6 meses a 1 ano", "unidade": "SSJ", "Q1": 5, "Q2": 5, "Q3": 5, "Q4": 5, "Q5": 5, "Q6": 5, "Q7": 5, "Q8": 5, "Q9": 5, "Q10": 5, "Q11": 3, "Q12": 3, "Q13": 4, "Q14": 3, "Q15": 4, "Q16": 3, "Q17": 4, "Q18": 5, "Q19": 3, "Q20": 3}, {"setor": "Produção", "funcao": "Operacional", "tempo": "Menos de 6 meses", "unidade": "SSB", "Q1": 5, "Q2": 5, "Q3": 5, "Q4": 5, "Q5": 5, "Q6": 5, "Q7": 5, "Q8": 5, "Q9": 5, "Q10": 5, "Q11": 5, "Q12": 1, "Q13": 5, "Q14": 1, "Q15": 5, "Q16": 5, "Q17": 5, "Q18": 5, "Q19": 5, "Q20": 5}, {"setor": "Frota", "funcao": "Operacional", "tempo": "Menos de 6 meses", "unidade": "CSA (Administrativo e Fábrica de Ração)", "Q1": 5, "Q2": 5, "Q3": 4, "Q4": 3, "Q5": 5, "Q6": 5, "Q7": 5, "Q8": 5, "Q9": 5, "Q10": 5, "Q11": 5, "Q12": 5, "Q13": 5, "Q14": 5, "Q15": 5, "Q16": 5, "Q17": 5, "Q18": 5, "Q19": 5, "Q20": 5}, {"setor": "Produção", "funcao": "Operacional", "tempo": "Menos de 6 meses", "unidade": "SSB", "Q1": 3, "Q2": 4, "Q3": 4, "Q4": 4, "Q5": 4, "Q6": 4, "Q7": 5, "Q8": 5, "Q9": 4, "Q10": 5, "Q11": 5, "Q12": 5, "Q13": 5, "Q14": 5, "Q15": 4, "Q16": 4, "Q17": 4, "Q18": 4, "Q19": 4, "Q20": 4}, {"setor": "Jardinagem/ETA/ETE", "funcao": "Liderança", "tempo": "Acima de 10 anos", "unidade": "SSB", "Q1": 2, "Q2": 2, "Q3": 3, "Q4": 2, "Q5": 5, "Q6": 5, "Q7": 5, "Q8": 5, "Q9": 3, "Q10": 5, "Q11": 5, "Q12": 5, "Q13": 5, "Q14": 5, "Q15": 5, "Q16": 5, "Q17": 5, "Q18": 5, "Q19": 5, "Q20": 5}, {"setor": "Administração", "funcao": "Administrativo", "tempo": "Menos de 6 meses", "unidade": "CSA (Administrativo e Fábrica de Ração)", "Q1": 3, "Q2": 5, "Q3": 4, "Q4": 3, "Q5": 4, "Q6": 3, "Q7": 5, "Q8": 5, "Q9": 3, "Q10": 3, "Q11": 5, "Q12": 5, "Q13": 4, "Q14": 3, "Q15": 3, "Q16": 3, "Q17": 3, "Q18": 3, "Q19": 4, "Q20": 3}, {"setor": "Administração", "funcao": "Administrativo", "tempo": "Menos de 6 meses", "unidade": "CSA (Administrativo e Fábrica de Ração)", "Q1": 5, "Q2": 5, "Q3": 3, "Q4": 1, "Q5": 5, "Q6": 4, "Q7": 5, "Q8": 5, "Q9": 5, "Q10": 5, "Q11": 5, "Q12": 5, "Q13": 5, "Q14": 5, "Q15": 5, "Q16": 5, "Q17": 5, "Q18": 5, "Q19": 4, "Q20": 5}, {"setor": "Limpeza/Lavanderia", "funcao": "Operacional", "tempo": "6 meses a 1 ano", "unidade": "SNSF", "Q1": 5, "Q2": 5, "Q3": 5, "Q4": 5, "Q5": 5, "Q6": 5, "Q7": 5, "Q8": 5, "Q9": 5, "Q10": 5, "Q11": 5, "Q12": 5, "Q13": 4, "Q14": 4, "Q15": 5, "Q16": 5, "Q17": 4, "Q18": 4, "Q19": 3, "Q20": 5}, {"setor": "Bovinocultura", "funcao": "Operacional", "tempo": "1 a 2 anos", "unidade": "FAM", "Q1": 4, "Q2": 4, "Q3": 4, "Q4": 4, "Q5": 5, "Q6": 5, "Q7": 5, "Q8": 5, "Q9": 5, "Q10": 5, "Q11": 4, "Q12": 4, "Q13": 4, "Q14": 5, "Q15": 5, "Q16": 3, "Q17": 4, "Q18": 5, "Q19": 5, "Q20": 5}, {"setor": "Produção", "funcao": "Operacional", "tempo": "6 meses a 1 ano", "unidade": "SNSF", "Q1": 4, "Q2": 5, "Q3": 5, "Q4": 3, "Q5": 4, "Q6": 3, "Q7": 5, "Q8": 5, "Q9": 1, "Q10": 5, "Q11": 5, "Q12": 5, "Q13": 5, "Q14": 1, "Q15": 5, "Q16": 5, "Q17": 5, "Q18": 5, "Q19": 5, "Q20": 5}];
+
+const Q_SHORT = ['Carga de Trabalho','Metas e Prazos','Jornada e Descanso','Organização',
+  'Clareza de Papel','Autonomia','Liderança – Respeito','Apoio da Liderança',
+  'Autonomia s/ Controle','Comunicação','Relações de Trabalho','Ambiente s/ Assédio',
+  'Reconhecimento','Critérios Justos','Segurança Psicológica',
+  'Desenvolvimento','Perspectivas Profissionais','Apoio Emocional',
+  'Equilíbrio Vida-Trabalho','Recursos Adequados'];
+
+const Q_FULL = [
+  'A quantidade de trabalho que recebo é compatível com o tempo disponível para realizá-la.',
+  'As metas, prazos e cobranças são compatíveis com as condições e os recursos disponíveis para o trabalho.',
+  'Minha jornada permite pausas e períodos adequados de descanso, sem necessidade frequente de horas extras.',
+  'O trabalho é organizado e planejado, evitando mudanças, interrupções e urgências constantes.',
+  'Sei claramente quais são minhas responsabilidades, prioridades e resultados esperados.',
+  'Tenho autonomia adequada para tomar decisões relacionadas às minhas atividades.',
+  'Minha liderança conduz a equipe com respeito, diálogo e abertura para diferentes opiniões.',
+  'Recebo apoio, orientação e feedback da liderança quando necessário.',
+  'Tenho autonomia para trabalhar sem controle ou cobrança excessivos.',
+  'A comunicação entre pessoas, áreas e lideranças permite que as informações necessárias cheguem de forma clara.',
+  'As relações de trabalho são respeitosas e os conflitos são tratados adequadamente.',
+  'O ambiente é livre de humilhações, intimidações, constrangimentos, perseguições ou comportamentos ofensivos.',
+  'Meu trabalho e minhas contribuições são reconhecidos e valorizados.',
+  'Percebo critérios justos e coerentes nas decisões que afetam os colaboradores.',
+  'Sinto-me seguro para expressar opiniões, apresentar ideias, pedir ajuda e comunicar erros ou dificuldades.',
+  'Tenho acesso a orientação, treinamento e oportunidades de desenvolvimento compatíveis com meu trabalho.',
+  'Tenho clareza e confiança razoáveis sobre minha continuidade e perspectivas profissionais na organização.',
+  'Quando meu trabalho envolve situações emocionalmente difíceis, tenho condições e apoio adequados para lidar.',
+  'Minha jornada e as demandas do trabalho permitem conciliar adequadamente minha vida profissional e pessoal.',
+  'Tenho pessoas, informações, equipamentos, ferramentas e recursos adequados para realizar meu trabalho.'
+];
+
+const THEMES = {
+  'Carga e Organização':[0,1,2,3],
+  'Autonomia e Clareza':[4,5,8],
+  'Liderança':[6,7],
+  'Relações e Ambiente':[9,10,11],
+  'Reconhecimento':[12,13,14],
+  'Desenvolvimento':[15,16],
+  'Bem-estar':[17,18],
+  'Recursos':[19]
+};
+const TNAMES = Object.keys(THEMES);
+const TCOLORS = ['#6366F1','#8B5CF6','#EC4899','#F43F5E','#F97316','#EAB308','#22C55E','#14B8A6'];
+const RESP_LABELS = ['Nunca','Raramente','Às vezes','Frequentemente','Sempre'];
+const RESP_COLORS = ['#EF4444','#F97316','#EAB308','#22C55E','#14B8A6'];
+
+// ── HELPERS ───────────────────────────────────────────────────────
+function sc(s){
+  if(s<2.5)return'#EF4444';if(s<3.0)return'#F97316';
+  if(s<3.5)return'#EAB308';if(s<4.2)return'#22C55E';return'#14B8A6';
+}
+function sl(s){
+  if(s<2.5)return'Alto Risco';if(s<3.0)return'Risco Moderado';
+  if(s<3.5)return'Atenção';if(s<4.2)return'Bom';return'Ótimo';
+}
+function bc(s){
+  if(s<2.5)return'bH';if(s<3.0)return'bM';
+  if(s<3.5)return'bA';if(s<4.2)return'bG';return'bT';
+}
+function hx(hex){
+  const h=hex.replace('#','');
+  const [r,g,b]=[0,2,4].map(i=>parseInt(h.substr(i,2),16));
+  return `rgba(${r},${g},${b},0.85)`;
+}
+
+// ── FILTER ────────────────────────────────────────────────────────
+let AD=[...RAW_DATA];
+function applyFilters(){
+  const s=document.getElementById('f-setor').value;
+  const u=document.getElementById('f-unidade').value;
+  const f=document.getElementById('f-funcao').value;
+  const t=document.getElementById('f-tempo').value;
+  AD=RAW_DATA.filter(r=>(!s||r.setor===s)&&(!u||r.unidade===u)&&(!f||r.funcao===f)&&(!t||r.tempo===t));
+  document.getElementById('f-count').textContent=AD.length+' respondentes';
+  updateAll();
+}
+function clearFilters(){
+  ['f-setor','f-unidade','f-funcao','f-tempo'].forEach(id=>document.getElementById(id).value='');
+  applyFilters();
+}
+
+// ── STATS ─────────────────────────────────────────────────────────
+function stats(data){
+  const n=data.length; if(!n)return null;
+  const avgQ=Array.from({length:20},(_,i)=>data.reduce((s,r)=>s+(r['Q'+(i+1)]||3),0)/n);
+  const thSc={};
+  for(const[nm,idxs]of Object.entries(THEMES))
+    thSc[nm]=idxs.reduce((s,i)=>s+avgQ[i],0)/idxs.length;
+  const overall=avgQ.reduce((s,v)=>s+v,0)/20;
+  const distQ=Array.from({length:20},(_,i)=>{
+    const q='Q'+(i+1); const c=[0,0,0,0,0];
+    data.forEach(r=>c[(r[q]||3)-1]++); return c.map(v=>v/n*100);
+  });
+  const gDist=[0,0,0,0,0];
+  data.forEach(r=>{for(let i=1;i<=20;i++)gDist[(r['Q'+i]||3)-1]++;});
+  const tot=n*20;
+  return{n,avgQ,thSc,overall,distQ,gDist:gDist.map(c=>c/tot*100)};
+}
+
+function groupStats(data,key){
+  const g={};
+  data.forEach(r=>{const k=r[key]||'Outros';if(!g[k])g[k]=[];g[k].push(r);});
+  return Object.fromEntries(Object.entries(g).map(([k,v])=>[k,stats(v)]));
+}
+
+// ── TABS ─────────────────────────────────────────────────────────
+function showTab(id,btn){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  btn.classList.add('active');
+  const map={
+    'por-questao':renderQtab,'por-tema':renderTemaTb,
+    'por-setor':renderSetorTb,'por-unidade':renderUnidadeTb,'dados':renderDados
+  };
+  if(map[id])map[id]();
+  setTimeout(()=>Object.values(CI).forEach(c=>c&&c.resize&&c.resize()),120);
+}
+
+// ── CHARTS ───────────────────────────────────────────────────────
+const CI={};
+
+function initCharts(st){
+  CI.radar=new Chart(document.getElementById('ch-radar'),{
+    type:'radar',
+    data:{labels:TNAMES,datasets:[{label:'Pontuação',data:TNAMES.map(t=>st.thSc[t]),
+      backgroundColor:'rgba(37,99,235,0.12)',borderColor:'#2563EB',borderWidth:2,
+      pointBackgroundColor:TNAMES.map(t=>sc(st.thSc[t])),pointBorderColor:'#fff',pointBorderWidth:2,pointRadius:5}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      scales:{r:{min:1,max:5,ticks:{stepSize:1,font:{size:10}},
+        pointLabels:{font:{size:10,weight:'600'}},grid:{color:'#E2E8F0'},angleLines:{color:'#E2E8F0'}}},
+      plugins:{legend:{display:false}}}
+  });
+
+  CI.donut=new Chart(document.getElementById('ch-donut'),{
+    type:'doughnut',
+    data:{labels:RESP_LABELS,datasets:[{data:st.gDist,
+      backgroundColor:RESP_COLORS,borderColor:'#fff',borderWidth:3}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'62%',
+      plugins:{legend:{position:'right',labels:{font:{size:11},padding:12}},
+        tooltip:{callbacks:{label:ctx=>` ${ctx.label}: ${ctx.parsed.toFixed(1)}%`}}}}
+  });
+
+  CI.barOv=new Chart(document.getElementById('ch-bar-ov'),{
+    type:'bar',
+    data:{labels:Q_SHORT.map((_,i)=>'Q'+(i+1)),datasets:[{label:'Média',
+      data:st.avgQ,backgroundColor:st.avgQ.map(sc),borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},
+        tooltip:{callbacks:{label:ctx=>` ${Q_SHORT[ctx.dataIndex]}: ${ctx.parsed.y.toFixed(2)} — ${sl(ctx.parsed.y)}`}}},
+      scales:{y:{min:1,max:5,grid:{color:'#F1F5F9'}},x:{grid:{display:false}}}}
+  });
+
+  CI.temaBar=new Chart(document.getElementById('ch-tema-bar'),{
+    type:'bar',
+    data:{labels:TNAMES,datasets:[{label:'Pontuação',
+      data:TNAMES.map(t=>st.thSc[t]),backgroundColor:TNAMES.map(t=>sc(st.thSc[t])),borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',
+      plugins:{legend:{display:false}},
+      scales:{x:{min:1,max:5,grid:{color:'#F1F5F9'}},y:{grid:{display:false}}}}
+  });
+
+  CI.temaRadar=new Chart(document.getElementById('ch-tema-radar'),{
+    type:'radar',
+    data:{labels:TNAMES,datasets:[{label:'Pontuação',data:TNAMES.map(t=>st.thSc[t]),
+      backgroundColor:'rgba(99,102,241,0.12)',borderColor:'#6366F1',borderWidth:2,
+      pointBackgroundColor:TNAMES.map(t=>sc(st.thSc[t])),pointBorderColor:'#fff',pointBorderWidth:2,pointRadius:5}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      scales:{r:{min:1,max:5,ticks:{stepSize:1,font:{size:9}},
+        pointLabels:{font:{size:9,weight:'600'}},grid:{color:'#E2E8F0'},angleLines:{color:'#E2E8F0'}}},
+      plugins:{legend:{display:false}}}
+  });
+}
+
+function updCharts(st){
+  if(!CI.radar)return;
+  CI.radar.data.datasets[0].data=TNAMES.map(t=>st.thSc[t]);
+  CI.radar.data.datasets[0].pointBackgroundColor=TNAMES.map(t=>sc(st.thSc[t]));
+  CI.radar.update('none');
+  CI.donut.data.datasets[0].data=st.gDist;
+  CI.donut.update('none');
+  CI.barOv.data.datasets[0].data=st.avgQ;
+  CI.barOv.data.datasets[0].backgroundColor=st.avgQ.map(sc);
+  CI.barOv.update('none');
+  CI.temaBar.data.datasets[0].data=TNAMES.map(t=>st.thSc[t]);
+  CI.temaBar.data.datasets[0].backgroundColor=TNAMES.map(t=>sc(st.thSc[t]));
+  CI.temaBar.update('none');
+  CI.temaRadar.data.datasets[0].data=TNAMES.map(t=>st.thSc[t]);
+  CI.temaRadar.data.datasets[0].pointBackgroundColor=TNAMES.map(t=>sc(st.thSc[t]));
+  CI.temaRadar.update('none');
+}
+
+// ── KPI ──────────────────────────────────────────────────────────
+function updKPI(st){
+  document.getElementById('kpi-n').textContent=st.n;
+  document.getElementById('f-count').textContent=st.n+' respondentes';
+  document.getElementById('kpi-ov').textContent=st.overall.toFixed(2);
+  document.getElementById('kpi-ov-lbl').textContent=sl(st.overall);
+  document.getElementById('kpi-card-ov').style.borderLeftColor=sc(st.overall);
+  const ent=Object.entries(st.thSc);
+  const best=ent.reduce((a,b)=>b[1]>a[1]?b:a);
+  const worst=ent.reduce((a,b)=>b[1]<a[1]?b:a);
+  document.getElementById('kpi-best-v').textContent=best[1].toFixed(2);
+  document.getElementById('kpi-best-v').style.color=sc(best[1]);
+  document.getElementById('kpi-best-n').textContent=best[0];
+  document.getElementById('kpi-worst-v').textContent=worst[1].toFixed(2);
+  document.getElementById('kpi-worst-v').style.color=sc(worst[1]);
+  document.getElementById('kpi-worst-n').textContent=worst[0];
+}
+
+// ── THEME CARDS ──────────────────────────────────────────────────
+function renderThemeCards(st){
+  document.getElementById('theme-cards').innerHTML=TNAMES.map((t,i)=>{
+    const s=st.thSc[t];const pct=((s-1)/4*100).toFixed(0);
+    return`<div class="tc" style="border-top-color:${TCOLORS[i]}">
+      <div class="tc-name">${t}</div>
+      <div class="tc-score" style="color:${sc(s)}">${s.toFixed(2)}</div>
+      <div class="tc-lbl">${sl(s)}</div>
+      <div class="sbar"><div class="sbar-f" style="width:${pct}%;background:${sc(s)}"></div></div>
+    </div>`;
+  }).join('');
+}
+
+// ── INSIGHTS ─────────────────────────────────────────────────────
+function renderInsights(st){
+  const ent=Object.entries(st.thSc).sort((a,b)=>a[1]-b[1]);
+  const worst=ent[0];const best=ent[ent.length-1];
+  const lowQ=st.avgQ.map((v,i)=>({v,i})).sort((a,b)=>a.v-b.v).slice(0,3);
+  const hiQ=st.avgQ.map((v,i)=>({v,i})).sort((a,b)=>b.v-a.v).slice(0,2);
+  const items=[
+    `Tema mais forte: <strong>${best[0]}</strong> (${best[1].toFixed(2)}/5 · ${sl(best[1])})`,
+    `Tema mais crítico: <strong>${worst[0]}</strong> (${worst[1].toFixed(2)}/5 · ${sl(worst[1])})`,
+    ...lowQ.filter(q=>q.v<3.5).map(q=>`Atenção: Q${q.i+1} "${Q_SHORT[q.i]}" (${q.v.toFixed(2)})`),
+    ...hiQ.map(q=>`Destaque: Q${q.i+1} "${Q_SHORT[q.i]}" (${q.v.toFixed(2)})`),
+  ];
+  document.getElementById('insight-list').innerHTML=items.map(s=>`<li>${s}</li>`).join('');
+}
+
+// ── TAB POR QUESTÃO ──────────────────────────────────────────────
+function renderQtab(){
+  const st=stats(AD); if(!st)return;
+  const mode=document.getElementById('q-sort').value;
+  let idx=Array.from({length:20},(_,i)=>i);
+  if(mode==='asc')idx.sort((a,b)=>st.avgQ[a]-st.avgQ[b]);
+  if(mode==='desc')idx.sort((a,b)=>st.avgQ[b]-st.avgQ[a]);
+  document.getElementById('q-rows').innerHTML=`<div class="q-rows">${
+    idx.map(i=>{
+      const s=st.avgQ[i];const d=st.distQ[i];
+      const segs=d.map((p,si)=>`<div style="width:${p.toFixed(1)}%;background:${RESP_COLORS[si]}"></div>`).join('');
+      return`<div class="q-row">
+        <div class="q-num">Q${i+1}</div>
+        <div>
+          <div class="q-text">${Q_FULL[i]}</div>
+          <div class="mini-dist">${segs}</div>
+        </div>
+        <div class="q-score" style="color:${sc(s)}">${s.toFixed(2)}</div>
+        <span class="badge ${bc(s)}">${sl(s)}</span>
+      </div>`;
+    }).join('')
+  }</div>`;
+}
+
+// ── TAB TEMA ─────────────────────────────────────────────────────
+function renderTemaTb(){
+  const st=stats(AD); if(!st)return;
+  const rows=TNAMES.map((t,i)=>{
+    const s=st.thSc[t];const pct=((s-1)/4*100).toFixed(0);
+    const idxs=THEMES[t];
+    return`<tr>
+      <td style="display:flex;align-items:center;gap:8px;padding:10px 14px">
+        <span style="width:12px;height:12px;border-radius:50%;background:${TCOLORS[i]};flex-shrink:0"></span>
+        <strong>${t}</strong>
+      </td>
+      <td style="text-align:center;font-weight:800;font-size:1.1rem;color:${sc(s)};padding:10px 14px">${s.toFixed(2)}</td>
+      <td style="padding:10px 14px"><span class="badge ${bc(s)}">${sl(s)}</span></td>
+      <td style="padding:10px 14px;font-size:.75rem;color:#64748B">${idxs.map(j=>'Q'+(j+1)).join(', ')}</td>
+      <td style="padding:10px 14px">
+        <div class="sbar" style="width:120px"><div class="sbar-f" style="width:${pct}%;background:${sc(s)}"></div></div>
+      </td>
+    </tr>`;
+  });
+  document.getElementById('tbl-tema').innerHTML=`
+    <thead><tr>
+      <th style="text-align:left">Tema</th><th>Pontuação</th><th>Classificação</th><th>Questões</th><th>Barra</th>
+    </tr></thead><tbody>${rows.join('')}</tbody>`;
+}
+
+// ── HEATMAP ──────────────────────────────────────────────────────
+function renderHeatmap(tblId,gKey,data){
+  const gs=groupStats(data,gKey);
+  const gkeys=Object.keys(gs).sort((a,b)=>a.localeCompare(b,'pt-BR'));
+  const head=`<tr><th>${gKey==='setor'?'Setor':'Unidade'}</th>${TNAMES.map(t=>`<th>${t}</th>`).join('')}<th>Média</th></tr>`;
+  const body=gkeys.map(k=>{
+    const s=gs[k];
+    const cols=TNAMES.map(t=>`<td style="background:${hx(sc(s.thSc[t]))};color:#fff">${s.thSc[t].toFixed(2)}</td>`).join('');
+    const disp=k.length>20?k.substring(0,18)+'…':k;
+    return`<tr><td><strong>${disp}</strong><br><small style="font-weight:400;color:#64748B;font-size:.7rem">${s.n} resp.</small></td>${cols}<td style="background:${hx(sc(s.overall))};color:#fff;font-weight:800">${s.overall.toFixed(2)}</td></tr>`;
+  }).join('');
+  document.getElementById(tblId).innerHTML=`<thead>${head}</thead><tbody>${body}</tbody>`;
+}
+
+// ── TAB SETOR ────────────────────────────────────────────────────
+function renderSetorTb(){
+  renderHeatmap('tbl-setor','setor',AD);
+  const gs=groupStats(AD,'setor');
+  const gkeys=Object.keys(gs).sort();
+  if(CI.setorBar)CI.setorBar.destroy();
+  CI.setorBar=new Chart(document.getElementById('ch-setor-bar'),{
+    type:'bar',
+    data:{labels:TNAMES,datasets:gkeys.map((k,i)=>{
+      const col=TCOLORS[i%TCOLORS.length];
+      return{label:k.length>18?k.substring(0,16)+'…':k,
+        data:TNAMES.map(t=>gs[k].thSc[t]),
+        backgroundColor:col+'BB',borderRadius:3};
+    })},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom',labels:{font:{size:10},padding:10}}},
+      scales:{y:{min:1,max:5,grid:{color:'#F1F5F9'}},x:{grid:{display:false}}}}
+  });
+}
+
+// ── TAB UNIDADE ──────────────────────────────────────────────────
+function renderUnidadeTb(){
+  renderHeatmap('tbl-unidade','unidade',AD);
+  const gs=groupStats(AD,'unidade');
+  const gkeys=Object.keys(gs).sort();
+  if(CI.unidadeBar)CI.unidadeBar.destroy();
+  CI.unidadeBar=new Chart(document.getElementById('ch-unidade-bar'),{
+    type:'bar',
+    data:{labels:TNAMES,datasets:gkeys.map((k,i)=>{
+      const col=TCOLORS[i%TCOLORS.length];
+      return{label:k.length>20?k.substring(0,18)+'…':k,
+        data:TNAMES.map(t=>gs[k].thSc[t]),
+        backgroundColor:col+'BB',borderRadius:3};
+    })},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom',labels:{font:{size:10},padding:10}}},
+      scales:{y:{min:1,max:5,grid:{color:'#F1F5F9'}},x:{grid:{display:false}}}}
+  });
+}
+
+// ── TAB DADOS ────────────────────────────────────────────────────
+function renderDados(){
+  document.getElementById('tbl-dados').innerHTML=AD.map((r,idx)=>{
+    const qs=Array.from({length:20},(_,i)=>r['Q'+(i+1)]||3);
+    const avg=qs.reduce((s,v)=>s+v,0)/20;
+    const un=r.unidade.length>15?r.unidade.substring(0,14)+'…':r.unidade;
+    return`<tr>
+      <td style="color:#94A3B8;font-size:.72rem">${idx+1}</td>
+      <td>${r.setor}</td><td style="font-size:.75rem">${un}</td>
+      <td>${r.funcao}</td><td style="font-size:.75rem">${r.tempo}</td>
+      ${qs.map(v=>`<td class="sc" style="color:${sc(v)}">${v}</td>`).join('')}
+      <td class="sc" style="font-size:.88rem;font-weight:800;color:${sc(avg)}">${avg.toFixed(1)}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── MAIN UPDATE ──────────────────────────────────────────────────
+function updateAll(){
+  const st=stats(AD); if(!st)return;
+  updKPI(st);
+  renderThemeCards(st);
+  renderInsights(st);
+  updCharts(st);
+  const actPanel=document.querySelector('.tab-panel.active');
+  if(actPanel){
+    const id=actPanel.id.replace('tab-','');
+    const map={'por-questao':renderQtab,'por-tema':renderTemaTb,'por-setor':renderSetorTb,'por-unidade':renderUnidadeTb,'dados':renderDados};
+    if(map[id])map[id]();
+  }
+}
+
+// ── INIT ─────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded',()=>{
+  const st=stats(RAW_DATA);
+  updKPI(st);
+  renderThemeCards(st);
+  renderInsights(st);
+  initCharts(st);
+});
+</script>
+</body>
+</html>
