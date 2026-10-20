@@ -24,10 +24,15 @@
 body{font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
 
 /* HEADER */
-.site-header{background:linear-gradient(135deg,#1B3A6B 0%,#0D2447 100%);padding:18px 32px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 12px rgba(0,0,0,.3)}
-.hdr-left h1{font-size:1.4rem;font-weight:800;color:#fff;letter-spacing:-.5px}
-.hdr-left p{font-size:.78rem;color:#93C5FD;margin-top:3px}
-.hdr-badge{background:rgba(255,255,255,.15);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:6px 14px;color:#E0F2FE;font-size:.78rem;font-weight:600}
+.site-header{background:linear-gradient(135deg,#1B3A6B 0%,#0D2447 100%);padding:16px 32px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 12px rgba(0,0,0,.3)}
+.hdr-brand{display:flex;align-items:center;gap:16px}
+.hdr-logo-box{background:#fff;padding:6px 12px;border-radius:10px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.18);flex-shrink:0;transition:transform var(--tr),box-shadow var(--tr)}
+.hdr-logo-box:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.25)}
+.hdr-logo{height:46px;width:auto;max-width:140px;object-fit:contain;display:block}
+.hdr-divider{width:1px;height:40px;background:rgba(255,255,255,.2);flex-shrink:0}
+.hdr-titles h1{font-size:1.35rem;font-weight:800;color:#fff;letter-spacing:-.5px;line-height:1.2}
+.hdr-titles p{font-size:.78rem;color:#93C5FD;margin-top:4px}
+.hdr-badge{background:rgba(255,255,255,.15);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:6px 14px;color:#E0F2FE;font-size:.78rem;font-weight:600;white-space:nowrap}
 
 /* FILTERS */
 .filters-wrap{background:#fff;border-bottom:1px solid var(--border);padding:12px 32px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;position:sticky;top:0;z-index:100;box-shadow:var(--sh)}
@@ -152,7 +157,13 @@ body{font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-seri
 .site-footer{text-align:center;padding:20px;font-size:.72rem;color:var(--muted);border-top:1px solid var(--border);margin-top:32px}
 
 @media(max-width:768px){
-  .site-header{padding:14px;flex-direction:column;gap:10px}
+  .site-header{padding:14px;flex-direction:column;gap:12px;align-items:flex-start}
+  .hdr-brand{gap:12px;width:100%}
+  .hdr-logo-box{padding:4px 8px}
+  .hdr-logo{height:38px}
+  .hdr-divider{height:32px}
+  .hdr-titles h1{font-size:1.15rem}
+  .hdr-titles p{font-size:.72rem}
   .filters-wrap{padding:10px 14px}
   .main{padding:14px}
   .chart-grid-2{grid-template-columns:1fr}
@@ -164,9 +175,15 @@ body{font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-seri
 <body>
 
 <header class="site-header">
-  <div class="hdr-left">
-    <h1>🏥 Pesquisa de Saúde Psicossocial</h1>
-    <p>Diagnóstico de Fatores Psicossociais do Trabalho · NR-01 · Outubro 2026</p>
+  <div class="hdr-brand">
+    <div class="hdr-logo-box">
+      <img src="logo_ianni.png" alt="Ianni Agropecuária" class="hdr-logo" onerror="this.onerror=null;this.src='Logo Ianni.png';">
+    </div>
+    <div class="hdr-divider"></div>
+    <div class="hdr-titles">
+      <h1>Pesquisa de Saúde Psicossocial</h1>
+      <p>Diagnóstico de Fatores Psicossociais do Trabalho · NR-01 · Outubro 2026</p>
+    </div>
   </div>
   <div class="hdr-badge">NR-01 · 2026</div>
 </header>
