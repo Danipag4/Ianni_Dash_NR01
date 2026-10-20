@@ -8,6 +8,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -74,6 +76,14 @@ body{font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-seri
 
 /* SECTION TITLE */
 .sec-title{font-size:1rem;font-weight:800;color:var(--p);margin-bottom:16px;padding-bottom:8px;border-bottom:2px solid var(--border)}
+.sec-title-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding-bottom:8px;border-bottom:2px solid var(--border);flex-wrap:wrap;gap:12px}
+.export-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.btn-export-excel{display:inline-flex;align-items:center;gap:7px;background:#107C41;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:.82rem;font-weight:700;font-family:inherit;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.15);transition:all var(--tr)}
+.btn-export-excel:hover{background:#0B5C30;box-shadow:0 4px 8px rgba(0,0,0,.2);transform:translateY(-1px)}
+.btn-export-excel:active{transform:translateY(0)}
+.btn-export-csv{display:inline-flex;align-items:center;gap:5px;background:#fff;color:var(--muted);border:1.5px solid var(--border);border-radius:8px;padding:7px 14px;font-size:.8rem;font-weight:600;font-family:inherit;cursor:pointer;transition:all var(--tr)}
+.btn-export-csv:hover{background:var(--bg);color:var(--text);border-color:#94A3B8}
+.btn-export-count{background:rgba(255,255,255,.25);border-radius:12px;padding:1px 7px;font-size:.73rem;font-weight:700}
 
 /* THEME CARDS */
 .theme-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:20px}
@@ -110,6 +120,33 @@ body{font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-seri
 .insight h4{font-size:.83rem;font-weight:700;color:#1E40AF;margin-bottom:8px}
 .insight ul{font-size:.8rem;color:#1E3A8A;list-style:none;display:flex;flex-direction:column;gap:5px}
 .insight li::before{content:"→ ";font-weight:700}
+
+/* Q-TAGS & TOOLTIP */
+.q-tag{display:inline-flex;align-items:center;justify-content:center;padding:3px 9px;background:#EEF2F6;border:1.5px solid #CBD5E1;border-radius:6px;font-size:.75rem;font-weight:800;color:var(--p);cursor:pointer;transition:all var(--tr);font-family:inherit;line-height:1.2}
+.q-tag:hover{background:var(--p);color:#fff;border-color:var(--p);transform:translateY(-1px);box-shadow:0 2px 5px rgba(0,0,0,.15)}
+
+.q-tooltip{position:fixed;display:none;z-index:99999;max-width:340px;background:#0F172A;color:#fff;border-radius:8px;padding:10px 14px;font-size:.78rem;box-shadow:0 10px 25px rgba(0,0,0,.35);pointer-events:none;line-height:1.4;transition:opacity .1s ease}
+.q-tooltip.visible{display:block}
+.q-tooltip-header{font-weight:800;font-size:.82rem;color:#93C5FD;margin-bottom:4px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.q-tooltip-body{color:#E2E8F0;margin-bottom:6px;font-size:.78rem}
+.q-tooltip-footer{font-size:.7rem;color:#94A3B8;border-top:1px solid rgba(255,255,255,.15);padding-top:4px;display:flex;align-items:center;justify-content:space-between}
+
+/* MODAL */
+.modal-backdrop{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(15,23,42,.65);backdrop-filter:blur(4px);z-index:10000;align-items:center;justify-content:center;padding:16px}
+.modal-backdrop.active{display:flex}
+.modal-card{background:#fff;border-radius:var(--r);max-width:580px;width:100%;box-shadow:0 20px 25px -5px rgba(0,0,0,.25),0 10px 10px -5px rgba(0,0,0,.1);overflow:hidden;animation:modalSlide .2s cubic-bezier(.16,1,.3,1)}
+@keyframes modalSlide{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+.modal-header{padding:16px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:#F8FAFC}
+.modal-badge{background:var(--p);color:#fff;font-weight:800;font-size:.85rem;padding:4px 10px;border-radius:6px}
+.modal-close{background:none;border:none;font-size:1.6rem;line-height:1;color:var(--muted);cursor:pointer;padding:4px 8px;border-radius:6px;transition:all var(--tr)}
+.modal-close:hover{background:#E2E8F0;color:var(--text)}
+.modal-body{padding:22px;display:flex;flex-direction:column;gap:16px}
+.modal-text-box{background:#F1F5F9;border-left:4px solid var(--pl);padding:14px 18px;border-radius:6px}
+.modal-stats-grid{display:flex;gap:16px;flex-wrap:wrap}
+.modal-stat-box{background:#fff;border:1px solid var(--border);border-radius:8px;padding:14px}
+.modal-stat-lbl{font-size:.7rem;font-weight:700;text-transform:uppercase;color:var(--muted);letter-spacing:.5px}
+.modal-stat-val{font-size:1.8rem;font-weight:800;line-height:1.1;margin-top:4px}
+.modal-footer{padding:14px 22px;background:#F8FAFC;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:flex-end;gap:10px}
 
 /* FOOTER */
 .site-footer{text-align:center;padding:20px;font-size:.72rem;color:var(--muted);border-top:1px solid var(--border);margin-top:32px}
@@ -289,7 +326,29 @@ body{font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-seri
 
     <!-- TAB 6 -->
     <div id="tab-dados" class="tab-panel">
-      <div class="sec-title">Respostas Individuais</div>
+      <div class="sec-title-bar">
+        <div class="sec-title" style="margin-bottom:0;border-bottom:none;padding-bottom:0">Respostas Individuais</div>
+        <div class="export-actions">
+          <button id="btn-export-excel" class="btn-export-excel" onclick="exportarExcel()" title="Baixar planilha completa em formato Excel (.xlsx)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="8" y1="13" x2="16" y2="13"></line>
+              <line x1="8" y1="17" x2="16" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+            Exportar para Excel (.xlsx) <span id="btn-export-count" class="btn-export-count"></span>
+          </button>
+          <button class="btn-export-csv" onclick="exportarCSV()" title="Baixar dados em formato CSV para Excel">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            CSV
+          </button>
+        </div>
+      </div>
       <div style="overflow-x:auto">
         <table class="dtbl">
           <thead><tr><th>#</th><th>Setor</th><th>Unidade</th><th>Função</th><th>Tempo</th><th>Q1</th>
@@ -323,6 +382,47 @@ body{font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-seri
 <footer class="site-footer">
   Diagnóstico Psicossocial · NR-01 · Confidencial · Uso exclusivo da Diretoria · Outubro 2026
 </footer>
+
+<!-- TOOLTIP FLUTUANTE DE QUESTÃO -->
+<div id="q-tooltip" class="q-tooltip"></div>
+
+<!-- MODAL DE DETALHES DA QUESTÃO -->
+<div id="modal-questao" class="modal-backdrop" onclick="fecharModalQuestao(event)">
+  <div class="modal-card" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <div style="display:flex;align-items:center;gap:12px">
+        <span id="modal-q-badge" class="modal-badge">Q1</span>
+        <div>
+          <h3 id="modal-q-title" style="margin:0;font-size:1.05rem;color:var(--p);font-weight:800">Carga de Trabalho</h3>
+          <span id="modal-q-theme" style="font-size:.75rem;color:var(--muted);font-weight:600">Tema: Carga e Organização</span>
+        </div>
+      </div>
+      <button class="modal-close" onclick="fecharModalQuestao()" title="Fechar (Esc)">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-text-box">
+        <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;color:var(--pl);margin-bottom:4px;letter-spacing:.5px">Enunciado da Questão</div>
+        <p id="modal-q-text" style="font-size:.92rem;line-height:1.45;color:var(--text);font-weight:500"></p>
+      </div>
+
+      <div class="modal-stats-grid">
+        <div class="modal-stat-box" style="min-width:140px;text-align:center">
+          <div class="modal-stat-lbl">Média Atual</div>
+          <div id="modal-q-score" class="modal-stat-val">3.42</div>
+          <div id="modal-q-risk" style="margin-top:6px"></div>
+        </div>
+        <div class="modal-stat-box" style="flex:1">
+          <div class="modal-stat-lbl" style="margin-bottom:10px">Distribuição das Respostas (% dos respondentes)</div>
+          <div id="modal-q-dist-bars" style="display:flex;flex-direction:column;gap:6px"></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-clear" onclick="irParaAbaQuestao()" style="font-size:.8rem;padding:8px 16px">Ver Detalhes em "Por Questão" →</button>
+      <button class="btn-export-csv" onclick="fecharModalQuestao()" style="padding:8px 16px">Fechar</button>
+    </div>
+  </div>
+</div>
 
 <script>
 // ── DATA ──────────────────────────────────────────────────────────
@@ -401,6 +501,8 @@ function applyFilters(){
   const t=document.getElementById('f-tempo').value;
   AD=RAW_DATA.filter(r=>(!s||r.setor===s)&&(!u||r.unidade===u)&&(!f||r.funcao===f)&&(!t||r.tempo===t));
   document.getElementById('f-count').textContent=AD.length+' respondentes';
+  const ec = document.getElementById('btn-export-count');
+  if(ec) ec.textContent = '(' + AD.length + ')';
   updateAll();
 }
 function clearFilters(){
@@ -602,7 +704,11 @@ function renderTemaTb(){
       </td>
       <td style="text-align:center;font-weight:800;font-size:1.1rem;color:${sc(s)};padding:10px 14px">${s.toFixed(2)}</td>
       <td style="padding:10px 14px"><span class="badge ${bc(s)}">${sl(s)}</span></td>
-      <td style="padding:10px 14px;font-size:.75rem;color:#64748B">${idxs.map(j=>'Q'+(j+1)).join(', ')}</td>
+      <td style="padding:8px 12px">
+        <div style="display:flex;flex-wrap:wrap;gap:4px;align-items:center">
+          ${idxs.map(j=>`<button type="button" class="q-tag" onclick="abrirModalQuestao(${j})" onmouseenter="showQTooltip(event,${j})" onmousemove="moveQTooltip(event)" onmouseleave="hideQTooltip()" title="Q${j+1} · ${Q_SHORT[j]}: ${Q_FULL[j]}">Q${j+1}</button>`).join('')}
+        </div>
+      </td>
       <td style="padding:10px 14px">
         <div class="sbar" style="width:120px"><div class="sbar-f" style="width:${pct}%;background:${sc(s)}"></div></div>
       </td>
@@ -613,6 +719,117 @@ function renderTemaTb(){
       <th style="text-align:left">Tema</th><th>Pontuação</th><th>Classificação</th><th>Questões</th><th>Barra</th>
     </tr></thead><tbody>${rows.join('')}</tbody>`;
 }
+
+// ── TOOLTIP E MODAL DE QUESTÕES ──────────────────────────────────
+function showQTooltip(e, idx){
+  const tt = document.getElementById('q-tooltip');
+  if(!tt) return;
+  const qNum = idx + 1;
+  const short = Q_SHORT[idx];
+  const full = Q_FULL[idx];
+  const st = stats(AD) || stats(RAW_DATA);
+  const score = st ? st.avgQ[idx] : 0;
+
+  tt.innerHTML = `
+    <div class="q-tooltip-header">
+      <span>Q${qNum} · ${short}</span>
+      <span style="color:${sc(score)};font-weight:800">${score.toFixed(2)}</span>
+    </div>
+    <div class="q-tooltip-body">“${full}”</div>
+    <div class="q-tooltip-footer">
+      <span>${sl(score)}</span>
+      <span style="color:#93C5FD">Clique para detalhes</span>
+    </div>
+  `;
+  tt.classList.add('visible');
+  moveQTooltip(e);
+}
+
+function moveQTooltip(e){
+  const tt = document.getElementById('q-tooltip');
+  if(!tt || !tt.classList.contains('visible')) return;
+  const pad = 14;
+  let x = e.clientX + pad;
+  let y = e.clientY + pad;
+  const w = tt.offsetWidth || 280;
+  const h = tt.offsetHeight || 100;
+  if(x + w > window.innerWidth - 10) x = e.clientX - w - pad;
+  if(y + h > window.innerHeight - 10) y = e.clientY - h - pad;
+  tt.style.left = Math.max(10, x) + 'px';
+  tt.style.top = Math.max(10, y) + 'px';
+}
+
+function hideQTooltip(){
+  const tt = document.getElementById('q-tooltip');
+  if(tt) tt.classList.remove('visible');
+}
+
+let currentModalQIndex = 0;
+
+function abrirModalQuestao(idx){
+  hideQTooltip();
+  currentModalQIndex = idx;
+  const qNum = idx + 1;
+  const short = Q_SHORT[idx];
+  const full = Q_FULL[idx];
+  const st = stats(AD) || stats(RAW_DATA);
+  const score = st ? st.avgQ[idx] : 0;
+  const dist = st ? st.distQ[idx] : [0,0,0,0,0];
+
+  let temaNome = 'Geral';
+  for(const [tName, qIndexes] of Object.entries(THEMES)){
+    if(qIndexes.includes(idx)){
+      temaNome = tName;
+      break;
+    }
+  }
+
+  document.getElementById('modal-q-badge').textContent = 'Q' + qNum;
+  document.getElementById('modal-q-title').textContent = short;
+  document.getElementById('modal-q-theme').textContent = 'Tema: ' + temaNome;
+  document.getElementById('modal-q-text').textContent = full;
+  document.getElementById('modal-q-score').textContent = score.toFixed(2);
+  document.getElementById('modal-q-score').style.color = sc(score);
+  document.getElementById('modal-q-risk').innerHTML = `<span class="badge ${bc(score)}">${sl(score)}</span>`;
+
+  const distHtml = RESP_LABELS.map((lbl, i)=>{
+    const pct = dist[i] || 0;
+    return `
+      <div style="display:flex;align-items:center;gap:8px;font-size:.76rem">
+        <span style="width:95px;color:var(--muted)">${lbl}</span>
+        <div style="flex:1;background:var(--border);height:8px;border-radius:4px;overflow:hidden">
+          <div style="width:${pct.toFixed(1)}%;background:${RESP_COLORS[i]};height:100%"></div>
+        </div>
+        <span style="width:40px;text-align:right;font-weight:700">${pct.toFixed(0)}%</span>
+      </div>
+    `;
+  }).join('');
+  document.getElementById('modal-q-dist-bars').innerHTML = distHtml;
+
+  document.getElementById('modal-questao').classList.add('active');
+}
+
+function fecharModalQuestao(e){
+  if(e && e.target && e.target.id !== 'modal-questao' && !e.target.classList.contains('modal-close') && e.target.tagName !== 'BUTTON'){
+    return;
+  }
+  document.getElementById('modal-questao').classList.remove('active');
+}
+
+function irParaAbaQuestao(){
+  fecharModalQuestao();
+  const qBtn = document.querySelectorAll('.tab-btn')[1];
+  if(qBtn) showTab('por-questao', qBtn);
+  setTimeout(()=>{
+    const el = document.getElementById('q-rows');
+    if(el) el.scrollIntoView({ behavior: 'smooth' });
+  }, 100);
+}
+
+document.addEventListener('keydown', (e)=>{
+  if(e.key === 'Escape') fecharModalQuestao();
+});
+
 
 // ── HEATMAP ──────────────────────────────────────────────────────
 function renderHeatmap(tblId,gKey,data){
@@ -670,6 +887,9 @@ function renderUnidadeTb(){
 
 // ── TAB DADOS ────────────────────────────────────────────────────
 function renderDados(){
+  const ec = document.getElementById('btn-export-count');
+  if(ec) ec.textContent = '(' + AD.length + ')';
+
   document.getElementById('tbl-dados').innerHTML=AD.map((r,idx)=>{
     const qs=Array.from({length:20},(_,i)=>r['Q'+(i+1)]||3);
     const avg=qs.reduce((s,v)=>s+v,0)/20;
@@ -682,6 +902,143 @@ function renderDados(){
       <td class="sc" style="font-size:.88rem;font-weight:800;color:${sc(avg)}">${avg.toFixed(1)}</td>
     </tr>`;
   }).join('');
+}
+
+// ── EXPORTAÇÃO EXCEL / CSV ───────────────────────────────────────
+function exportarExcel(){
+  if(typeof XLSX === 'undefined'){
+    exportarCSV();
+    return;
+  }
+  if(!AD || !AD.length){
+    alert('Nenhum dado disponível para exportação com os filtros atuais.');
+    return;
+  }
+
+  // 1. Aba Respostas Individuais
+  const rowsExport = AD.map(function(r, idx){
+    const qs = Array.from({length:20}, function(_, i){ return r['Q'+(i+1)] || 3; });
+    const avg = qs.reduce(function(s, v){ return s + v; }, 0) / 20;
+    const rowObj = {
+      '#': idx + 1,
+      'Setor': r.setor,
+      'Unidade': r.unidade,
+      'Função': r.funcao,
+      'Tempo de Empresa': r.tempo
+    };
+    qs.forEach(function(v, i){
+      rowObj['Q' + (i + 1) + ' - ' + Q_SHORT[i]] = v;
+    });
+    rowObj['Média'] = parseFloat(avg.toFixed(2));
+    rowObj['Classificação de Risco'] = sl(avg);
+    return rowObj;
+  });
+
+  const wsRespostas = XLSX.utils.json_to_sheet(rowsExport);
+
+  // Largura das colunas
+  const colWidths = [
+    { wch: 6 },
+    { wch: 22 },
+    { wch: 20 },
+    { wch: 24 },
+    { wch: 18 }
+  ];
+  for(let i = 0; i < 20; i++){
+    colWidths.push({ wch: 24 });
+  }
+  colWidths.push({ wch: 10 });
+  colWidths.push({ wch: 20 });
+  wsRespostas['!cols'] = colWidths;
+
+  // 2. Aba Dicionário de Questões
+  const rowsDic = Q_SHORT.map(function(short, i){
+    let temaNome = 'Geral';
+    for(const [tName, qIndexes] of Object.entries(THEMES)){
+      if(qIndexes.includes(i)){
+        temaNome = tName;
+        break;
+      }
+    }
+    return {
+      'Questão': 'Q' + (i + 1),
+      'Tema': temaNome,
+      'Título Resumido': short,
+      'Pergunta Completa': Q_FULL[i]
+    };
+  });
+  const wsDic = XLSX.utils.json_to_sheet(rowsDic);
+  wsDic['!cols'] = [
+    { wch: 10 },
+    { wch: 24 },
+    { wch: 26 },
+    { wch: 80 }
+  ];
+
+  // 3. Aba Escala de Avaliação
+  const rowsEscala = [
+    { 'Nota': 1, 'Frequência': 'Nunca', 'Classificação de Risco': 'Alto Risco (< 2.50)' },
+    { 'Nota': 2, 'Frequência': 'Raramente', 'Classificação de Risco': 'Risco Moderado (2.50 a 2.99)' },
+    { 'Nota': 3, 'Frequência': 'Às vezes', 'Classificação de Risco': 'Atenção (3.00 a 3.49)' },
+    { 'Nota': 4, 'Frequência': 'Frequentemente', 'Classificação de Risco': 'Bom (3.50 a 4.19)' },
+    { 'Nota': 5, 'Frequência': 'Sempre', 'Classificação de Risco': 'Ótimo (>= 4.20)' }
+  ];
+  const wsEscala = XLSX.utils.json_to_sheet(rowsEscala);
+  wsEscala['!cols'] = [{ wch: 8 }, { wch: 18 }, { wch: 32 }];
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, wsRespostas, 'Respostas Individuais');
+  XLSX.utils.book_append_sheet(wb, wsDic, 'Dicionário de Questões');
+  XLSX.utils.book_append_sheet(wb, wsEscala, 'Escala de Avaliação');
+
+  const d = new Date();
+  const dataStr = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  const nomeArq = 'pesquisa_saude_respostas_' + dataStr + '.xlsx';
+
+  XLSX.writeFile(wb, nomeArq);
+}
+
+function exportarCSV(){
+  if(!AD || !AD.length){
+    alert('Nenhum dado disponível para exportação com os filtros atuais.');
+    return;
+  }
+
+  const headers = ['#', 'Setor', 'Unidade', 'Função', 'Tempo de Empresa'];
+  for(let i = 0; i < 20; i++){
+    headers.push('Q' + (i + 1) + ' (' + Q_SHORT[i] + ')');
+  }
+  headers.push('Média Geral', 'Classificação de Risco');
+
+  const lines = [headers.map(function(h){ return '"' + h.replace(/"/g, '""') + '"'; }).join(';')];
+
+  AD.forEach(function(r, idx){
+    const qs = Array.from({length:20}, function(_, i){ return r['Q'+(i+1)] || 3; });
+    const avg = qs.reduce(function(s, v){ return s + v; }, 0) / 20;
+    const row = [
+      idx + 1,
+      r.setor,
+      r.unidade,
+      r.funcao,
+      r.tempo
+    ].concat(qs).concat([
+      avg.toFixed(2).replace('.', ','),
+      sl(avg)
+    ]);
+    lines.push(row.map(function(v){ return '"' + String(v).replace(/"/g, '""') + '"'; }).join(';'));
+  });
+
+  const blob = new Blob([String.fromCharCode(0xFEFF) + lines.join(String.fromCharCode(13, 10))], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const d = new Date();
+  const dataStr = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  a.download = 'pesquisa_saude_respostas_' + dataStr + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 // ── MAIN UPDATE ──────────────────────────────────────────────────
@@ -701,6 +1058,8 @@ function updateAll(){
 
 // ── INIT ─────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded',()=>{
+  const ec = document.getElementById('btn-export-count');
+  if(ec) ec.textContent = '(' + RAW_DATA.length + ')';
   const st=stats(RAW_DATA);
   updKPI(st);
   renderThemeCards(st);
