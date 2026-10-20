@@ -577,7 +577,8 @@ function initCharts(st){
     options:{responsive:true,maintainAspectRatio:false,
       scales:{r:{min:1,max:5,ticks:{stepSize:1,font:{size:10}},
         pointLabels:{font:{size:10,weight:'600'}},grid:{color:'#E2E8F0'},angleLines:{color:'#E2E8F0'}}},
-      plugins:{legend:{display:false}}}
+      plugins:{legend:{display:false},
+        tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${ctx.parsed.r.toFixed(2)}`}}}}
   });
 
   CI.donut=new Chart(document.getElementById('ch-donut'),{
@@ -604,7 +605,8 @@ function initCharts(st){
     data:{labels:TNAMES,datasets:[{label:'Pontuação',
       data:TNAMES.map(t=>st.thSc[t]),backgroundColor:TNAMES.map(t=>sc(st.thSc[t])),borderRadius:4}]},
     options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',
-      plugins:{legend:{display:false}},
+      plugins:{legend:{display:false},
+        tooltip:{callbacks:{label:ctx=>` ${ctx.label}: ${ctx.parsed.x.toFixed(2)} — ${sl(ctx.parsed.x)}`}}},
       scales:{x:{min:1,max:5,grid:{color:'#F1F5F9'}},y:{grid:{display:false}}}}
   });
 
@@ -616,7 +618,8 @@ function initCharts(st){
     options:{responsive:true,maintainAspectRatio:false,
       scales:{r:{min:1,max:5,ticks:{stepSize:1,font:{size:9}},
         pointLabels:{font:{size:9,weight:'600'}},grid:{color:'#E2E8F0'},angleLines:{color:'#E2E8F0'}}},
-      plugins:{legend:{display:false}}}
+      plugins:{legend:{display:false},
+        tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${ctx.parsed.r.toFixed(2)}`}}}}
   });
 }
 
@@ -877,7 +880,8 @@ function renderSetorTb(){
         backgroundColor:col+'BB',borderRadius:3};
     })},
     options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{position:'bottom',labels:{font:{size:10},padding:10}}},
+      plugins:{legend:{position:'bottom',labels:{font:{size:10},padding:10}},
+        tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${ctx.parsed.y.toFixed(2)} — ${sl(ctx.parsed.y)}`}}},
       scales:{y:{min:1,max:5,grid:{color:'#F1F5F9'}},x:{grid:{display:false}}}}
   });
 }
@@ -897,7 +901,8 @@ function renderUnidadeTb(){
         backgroundColor:col+'BB',borderRadius:3};
     })},
     options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{position:'bottom',labels:{font:{size:10},padding:10}}},
+      plugins:{legend:{position:'bottom',labels:{font:{size:10},padding:10}},
+        tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${ctx.parsed.y.toFixed(2)} — ${sl(ctx.parsed.y)}`}}},
       scales:{y:{min:1,max:5,grid:{color:'#F1F5F9'}},x:{grid:{display:false}}}}
   });
 }
@@ -916,7 +921,7 @@ function renderDados(){
       <td>${r.setor}</td><td style="font-size:.75rem">${un}</td>
       <td>${r.funcao}</td><td style="font-size:.75rem">${r.tempo}</td>
       ${qs.map(v=>`<td class="sc" style="color:${sc(v)}">${v}</td>`).join('')}
-      <td class="sc" style="font-size:.88rem;font-weight:800;color:${sc(avg)}">${avg.toFixed(1)}</td>
+      <td class="sc" style="font-size:.88rem;font-weight:800;color:${sc(avg)}">${avg.toFixed(2)}</td>
     </tr>`;
   }).join('');
 }
