@@ -170,80 +170,9 @@ body{font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-seri
   .q-row{grid-template-columns:44px 1fr 70px}
   .q-row .badge{display:none}
 }
-
-/* ── EXPORTAR PDF / IMPRESSÃO ─────────────────────────────── */
-.btn-pdf{display:inline-flex;align-items:center;gap:7px;background:#B91C1C;color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:.8rem;font-weight:700;font-family:inherit;cursor:pointer;transition:background var(--tr),transform var(--tr);white-space:nowrap}
-.btn-pdf:hover{background:#991B1B;transform:translateY(-1px)}
-.btn-pdf:active{transform:translateY(0)}
-.print-img{display:block;width:100%;height:100%;object-fit:contain}
-#print-header,#print-legend{display:none}
-@page{size:A4 landscape;margin:10mm 10mm 14mm 10mm}
-@page{@bottom-left{content:"Ianni Agropecuária · Pesquisa de Saúde Psicossocial · NR-01";font:8pt Arial,sans-serif;color:#64748B}@bottom-right{content:"Página " counter(page) " de " counter(pages);font:8pt Arial,sans-serif;color:#64748B}}
-@media print{
-  *,*::before,*::after{-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  html,body{background:#fff!important;min-height:0!important}
-  .site-header,.filters-wrap,.tabs-nav,.modal-backdrop,.q-tooltip,#q-sort,.btn-pdf{display:none!important}
-  .tab-panel{display:none!important}
-  .tab-panel.active{display:block!important;padding:0!important}
-  .main{max-width:none;padding:0}
-  .tabs-wrap{box-shadow:none;border-radius:0;overflow:visible;background:#fff}
-  /* cabeçalho do relatório */
-  #print-header{display:block;margin-bottom:10px;padding-bottom:8px;border-bottom:3px solid var(--p)}
-  .ph-top{display:flex;align-items:center;gap:14px}
-  .ph-logo{height:44px;width:auto;max-width:140px;object-fit:contain}
-  .ph-titles{flex:1}
-  .ph-titles h1{font-size:17pt;font-weight:800;color:var(--p);line-height:1.15}
-  .ph-titles p{font-size:8.5pt;color:var(--muted);margin-top:3px}
-  .ph-meta{text-align:right;font-size:8pt;color:var(--muted);line-height:1.5}
-  .ph-meta strong{display:block;font-size:11pt;color:var(--p);font-weight:800}
-  .ph-filters{margin-top:8px;font-size:8.5pt;color:var(--text);display:flex;flex-wrap:wrap;gap:6px;align-items:center}
-  .ph-filters .ph-lbl{font-weight:700;color:var(--muted);text-transform:uppercase;font-size:7.5pt;letter-spacing:.5px}
-  .ph-chip{background:#EEF2F7;border:1px solid #CBD5E1;border-radius:12px;padding:2px 10px;font-weight:600}
-  /* KPIs e cartões */
-  .kpi-grid{grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:10px}
-  .kpi-card{box-shadow:none;border:1px solid var(--border);border-left-width:4px;padding:8px 14px}
-  .kpi-val{font-size:1.5rem}
-  .theme-grid{grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}
-  .tc,.q-row{box-shadow:none;border:1px solid var(--border)}
-  .tc{border-top-width:4px;padding:9px 12px}
-  .tc-score{font-size:1.5rem}
-  .chart-grid-2{gap:10px;margin-bottom:10px}
-  .chart-grid-2 .print-img{height:215px}
-  .chart-card{background:#fff;border:1px solid var(--border);padding:10px 14px}
-  .chart-card h3{margin-bottom:6px}
-  .sec-title{margin-bottom:10px}
-  .chart-card>div:has(>.print-img){height:auto!important}
-  .insight{margin-top:12px}
-  .kpi-card,.tc,.chart-card,.q-row,.insight,.hmap tr,.dtbl tr{break-inside:avoid;page-break-inside:avoid}
-  .sec-title{break-after:avoid;page-break-after:avoid}
-  .tab-panel.active div[style*="overflow-x"]{overflow:visible!important}
-  .hmap,.dtbl{font-size:.72rem}
-  .hmap th,.hmap td{padding:6px 8px}
-  .q-row:hover,.kpi-card:hover{transform:none}
-  #q-rows{gap:5px!important}
-  .q-row{padding:7px 14px}
-  .tab-panel.active div[style*="overflow-x"]{break-inside:avoid;page-break-inside:avoid}
-  /* legenda e rodapé */
-  #print-legend{display:block;margin-top:14px;padding-top:8px;border-top:1px solid var(--border);font-size:7.5pt;color:var(--muted);line-height:1.6;break-inside:avoid}
-  #print-legend .lg-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin:0 3px 0 8px;vertical-align:middle}
-  .site-footer{margin-top:6px;padding:6px 0 0;border-top:0;font-size:7.5pt}
-}
 </style>
 </head>
 <body>
-<!-- CABEÇALHO DE IMPRESSÃO / PDF (visível apenas ao imprimir) -->
-<div id="print-header">
-  <div class="ph-top">
-    <img class="ph-logo" src="logo_ianni.png" alt="Ianni Agropecuária" onerror="this.onerror=null;this.src='Logo Ianni.png';">
-    <div class="ph-titles">
-      <h1>Pesquisa de Saúde Psicossocial</h1>
-      <p>Diagnóstico de Fatores Psicossociais do Trabalho · NR-01 · Outubro 2026</p>
-    </div>
-    <div class="ph-meta"><strong id="ph-aba"></strong><span id="ph-data"></span></div>
-  </div>
-  <div class="ph-filters" id="ph-filters"></div>
-</div>
-
 
 <header class="site-header">
   <div class="hdr-brand">
@@ -299,7 +228,6 @@ body{font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-seri
     </select>
   </div>
   <button class="btn-clear" onclick="clearFilters()">↺ Limpar</button>
-  <button class="btn-pdf" id="btn-pdf" onclick="exportarPDF()" title="Gerar PDF da tela atual (gráficos como exibidos, com cabeçalho e filtros aplicados)">📄 Exportar PDF</button>
   <span id="f-count" class="f-count">55 respondentes</span>
 </div>
 
@@ -468,18 +396,6 @@ body{font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-seri
   </div><!-- /tabs-wrap -->
 </div><!-- /main -->
 
-
-<!-- LEGENDA DE IMPRESSÃO (visível apenas ao imprimir) -->
-<div id="print-legend">
-  <strong>Como ler:</strong> pontuação média de 1 a 5 (Nunca = 1 · Raramente = 2 · Às vezes = 3 · Frequentemente = 4 · Sempre = 5); quanto maior, melhor.
-  <br><strong>Classificação:</strong>
-  <span class="lg-dot" style="background:#EF4444"></span>Alto Risco (&lt; 2,5)
-  <span class="lg-dot" style="background:#F97316"></span>Risco Moderado (2,5 a 2,9)
-  <span class="lg-dot" style="background:#EAB308"></span>Atenção (3,0 a 3,4)
-  <span class="lg-dot" style="background:#22C55E"></span>Bom (3,5 a 4,1)
-  <span class="lg-dot" style="background:#14B8A6"></span>Ótimo (≥ 4,2)
-  <br><span id="pl-base"></span>
-</div>
 <footer class="site-footer">
   Diagnóstico Psicossocial · NR-01 · Confidencial · Uso exclusivo da Diretoria · Outubro 2026
 </footer>
@@ -637,8 +553,6 @@ function groupStats(data,key){
 
 // ── TABS ─────────────────────────────────────────────────────────
 function showTab(id,btn){
-  restaurarImpressao();
-  const _bp=document.getElementById('btn-pdf'); if(_bp)_bp.style.display=(id==='dados')?'none':'';
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('tab-'+id).classList.add('active');
@@ -1151,7 +1065,6 @@ function exportarCSV(){
 
 // ── MAIN UPDATE ──────────────────────────────────────────────────
 function updateAll(){
-  restaurarImpressao();
   const st=stats(AD); if(!st)return;
   updKPI(st);
   renderThemeCards(st);
@@ -1163,65 +1076,6 @@ function updateAll(){
     const map={'por-questao':renderQtab,'por-tema':renderTemaTb,'por-setor':renderSetorTb,'por-unidade':renderUnidadeTb,'dados':renderDados};
     if(map[id])map[id]();
   }
-}
-
-
-// ── EXPORTAR PDF (impressão otimizada) ───────────────────────────
-const TAB_LABELS={'visao-geral':'Visão Geral','por-questao':'Por Questão','por-tema':'Por Tema','por-setor':'Por Setor','por-unidade':'Por Unidade','dados':'Dados'};
-let _printSwap=[], _printTitle=null;
-function _esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-function prepararImpressao(){
-  if(_printSwap.length||_printTitle!==null) return;      // já preparado
-  const panel=document.querySelector('.tab-panel.active'); if(!panel) return;
-  const id=panel.id.replace('tab-','');
-  const aba=TAB_LABELS[id]||id;
-  const agora=new Date();
-  const dataTxt=agora.toLocaleDateString('pt-BR')+' às '+agora.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-  // filtros aplicados
-  const filtros=[['Setor','f-setor'],['Unidade','f-unidade'],['Função','f-funcao'],['Tempo','f-tempo']]
-    .map(([n,i])=>[n,document.getElementById(i).value]).filter(x=>x[1]);
-  const chips=filtros.length
-    ? filtros.map(([n,v])=>'<span class="ph-chip">'+_esc(n)+': '+_esc(v)+'</span>').join('')
-    : '<span class="ph-chip">Sem filtros · todos os respondentes</span>';
-  document.getElementById('ph-aba').textContent=aba;
-  document.getElementById('ph-data').textContent='Emitido em '+dataTxt;
-  document.getElementById('ph-filters').innerHTML='<span class="ph-lbl">Filtros:</span>'+chips+
-    '<span class="ph-lbl" style="margin-left:8px">Base:</span><span class="ph-chip">'+AD.length+' de '+RAW_DATA.length+' respondentes</span>';
-  document.getElementById('pl-base').textContent='Documento gerado em '+dataTxt+' a partir do dashboard interativo · Base: '+AD.length+' respondente(s).';
-  // gráficos: congela cada canvas como imagem (sai exatamente como está na tela)
-  panel.querySelectorAll('canvas').forEach(cv=>{
-    if(!cv.width||!cv.height) return;
-    try{
-      const ch=(window.Chart&&Chart.getChart)?Chart.getChart(cv):null;
-      if(ch){ch.update('none');if(ch.draw)ch.draw();}   // redesenho síncrono (evita pegar o gráfico no meio da animação)
-      const img=new Image();
-      img.className='print-img'; img.alt='';
-      img.src=cv.toDataURL('image/png');
-      cv.parentNode.insertBefore(img,cv);
-      cv.style.display='none';
-      _printSwap.push([cv,img]);
-    }catch(e){}
-  });
-  // nome sugerido para o arquivo PDF
-  _printTitle=document.title;
-  const dd=agora.getFullYear()+'-'+String(agora.getMonth()+1).padStart(2,'0')+'-'+String(agora.getDate()).padStart(2,'0');
-  document.title='NR01_'+aba.normalize('NFD').replace(/[^A-Za-z0-9 -]/g,'').trim().split(' ').join('-')+'_'+dd;
-}
-function restaurarImpressao(){
-  _printSwap.forEach(([cv,img])=>{img.remove();cv.style.display='';});
-  _printSwap=[];
-  if(_printTitle!==null){document.title=_printTitle;_printTitle=null;}
-}
-function exportarPDF(){
-  prepararImpressao();
-  window.print();
-}
-window.addEventListener('beforeprint',prepararImpressao);
-window.addEventListener('afterprint',restaurarImpressao);
-if(window.matchMedia){
-  const _mq=window.matchMedia('print');
-  const _fn=e=>{if(!e.matches)restaurarImpressao();};
-  if(_mq.addEventListener)_mq.addEventListener('change',_fn);else if(_mq.addListener)_mq.addListener(_fn);
 }
 
 // ── INIT ─────────────────────────────────────────────────────────
